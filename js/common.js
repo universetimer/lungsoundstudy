@@ -12,11 +12,24 @@ function buildHeader(activeKey = "") {
   return `
     <header class="site-header">
       <div class="container header-inner">
-        <a href="index.html" class="brand">
-          <div class="brand-mark">청</div>
+        <a href="index.html" class="brand" aria-label="Lung Sound Study 홈">
+          <svg class="brand-logo" viewBox="0 0 44 44" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <defs>
+              <linearGradient id="lssGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#073F62" />
+                <stop offset="55%" stop-color="#0E5A8A" />
+                <stop offset="100%" stop-color="#14B8A6" />
+              </linearGradient>
+            </defs>
+            <circle cx="22" cy="22" r="20" fill="url(#lssGrad)" />
+            <circle cx="22" cy="22" r="15.5" fill="none" stroke="rgba(255,255,255,0.18)" stroke-width="1" />
+            <path d="M5.5 22 L9 22 Q11 22 12 19 L13.5 14 Q14.5 11.5 16 14 L17.5 18 Q18.5 20.5 20 18 L21.5 13 Q23 9.5 24.5 13 L26 18.5 Q27 21.5 28.5 19 L30 15 Q31 12.5 32 16 L33 22 L38.5 22"
+              fill="none" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+            <circle cx="22" cy="22" r="1.6" fill="#A7F3D0" />
+          </svg>
           <div class="brand-text">
-            <strong>청진음 학습</strong>
-            <span>Auscultation Trainer</span>
+            <strong>Lung Sound Study</strong>
+            <span>청진음 학습 · Auscultation Trainer</span>
           </div>
         </a>
         <nav class="main-nav" id="mainNav">

@@ -91,25 +91,49 @@ for x in range(SG_W):
             px[SG_X + x, yy] = (20, 184, 166)
 
 # ---------- right text ----------
-title_font = ImageFont.truetype(FONT_BOLD, 88)
-en_font    = ImageFont.truetype(FONT_BOLD, 42)
+title_font = ImageFont.truetype(FONT_BOLD, 64)
+sub_font   = ImageFont.truetype(FONT_BOLD, 56)
 desc_font  = ImageFont.truetype(FONT_REG, 26)
 url_font   = ImageFont.truetype(FONT_BOLD, 30)
 chip_font  = ImageFont.truetype(FONT_BOLD, 18)
 
-# eyebrow badge
-bbox = chip_font.getbbox("CLINICAL AUSCULTATION")
-bw = bbox[2] + 30
-draw.rounded_rectangle([620, 120, 620 + bw, 158], radius=999, outline=(255,255,255), width=2)
-draw.text((620 + 15, 130), "CLINICAL AUSCULTATION", font=chip_font, fill="#FFFFFF")
+# ---------- 우측 상단 미니 로고 (헤더 SVG 모방) ----------
+LOGO_X, LOGO_Y, LOGO_R = 660, 138, 30
+# outer disc with gradient (간단히 단색 → 흰 테두리)
+for ang_y in range(-LOGO_R, LOGO_R + 1):
+    for ang_x in range(-LOGO_R, LOGO_R + 1):
+        if ang_x * ang_x + ang_y * ang_y <= LOGO_R * LOGO_R:
+            t = (ang_x + LOGO_R + ang_y + LOGO_R) / (4 * LOGO_R)
+            r = int(0x07 + (0x14 - 0x07) * t)
+            g = int(0x3F + (0xB8 - 0x3F) * t)
+            b = int(0x62 + (0xA6 - 0x62) * t)
+            px[LOGO_X + ang_x, LOGO_Y + ang_y] = (r, g, b)
+# 작은 파형 흰 라인
+import math as _m
+wf_pts = []
+for i in range(-LOGO_R + 5, LOGO_R - 4):
+    t = (i + LOGO_R - 5) / (2 * (LOGO_R - 5))
+    amp = (_m.sin(t * 14) * 0.35 +
+           _m.exp(-((t - 0.35) ** 2) * 50) * 0.7 +
+           _m.exp(-((t - 0.7) ** 2) * 45) * 0.6) * 0.45
+    y_off = int(amp * (LOGO_R * 0.55))
+    wf_pts.append((LOGO_X + i, LOGO_Y - y_off))
+for j in range(len(wf_pts) - 1):
+    draw.line([wf_pts[j], wf_pts[j+1]], fill="#FFFFFF", width=2)
 
-# main title
-draw.text((620, 180), "청진음 학습기", font=title_font, fill="#FFFFFF")
-# english
-draw.text((620, 290), "Auscultation Trainer", font=en_font, fill="#A7F3D0")
+# eyebrow badge (조금 아래로)
+bbox = chip_font.getbbox("CLINICAL AUSCULTATION TRAINER")
+bw = bbox[2] + 30
+draw.rounded_rectangle([720, 120, 720 + bw, 158], radius=999, outline=(255,255,255), width=2)
+draw.text((720 + 15, 130), "CLINICAL AUSCULTATION TRAINER", font=chip_font, fill="#FFFFFF")
+
+# main title (영문 메인)
+draw.text((620, 195), "Lung Sound Study", font=title_font, fill="#FFFFFF")
+# 한글 부제 (메인 톤으로 크게)
+draw.text((620, 275), "청진음 학습기", font=sub_font, fill="#A7F3D0")
 # desc
-draw.text((620, 360), "271개 임상 폐음 · 6 라벨", font=desc_font, fill="#E2E8F0")
-draw.text((620, 400), "도감 · 퀴즈 · 비교 · 시각화", font=desc_font, fill="#E2E8F0")
+draw.text((620, 365), "271개 임상 폐음 · 6 라벨", font=desc_font, fill="#E2E8F0")
+draw.text((620, 405), "도감 · 퀴즈 · 비교 · 시각화", font=desc_font, fill="#E2E8F0")
 
 # url box
 draw.rounded_rectangle([620, 490, 990, 555], radius=12, fill=(8, 30, 55), outline=(255,255,255,80), width=1)
