@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>비교 | 청진음 학습기</title>
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css" />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <div id="siteHeader"></div>
+
+  <section class="page-hero" style="padding:36px 0 40px;">
+    <div class="container">
+      <span class="eyebrow">Compare</span>
+      <h1 style="font-size:30px;">비교 모드</h1>
+      <p>두 라벨의 샘플을 나란히 듣고 감별 포인트를 확인합니다.</p>
+    </div>
+  </section>
+
+  <main class="section">
+    <div class="container">
+      <div class="compare-controls">
+        <div class="field">
+          <label>왼쪽 라벨 (A)</label>
+          <select id="labA"></select>
+        </div>
+        <div class="field">
+          <label>오른쪽 라벨 (B)</label>
+          <select id="labB"></select>
+        </div>
+        <div style="display:flex; gap:8px; flex-wrap:wrap;">
+          <button class="btn btn-ghost" id="shuffleBtn">샘플 다시 뽑기</button>
+          <button class="btn btn-primary" id="playBoth">동시 재생</button>
+          <button class="btn btn-outline" id="playAlt">번갈아 재생</button>
+          <button class="btn btn-ghost" id="stopAll">정지</button>
+        </div>
+      </div>
+
+      <div class="preset-row" id="presetRow"></div>
+
+      <div class="compare-grid">
+        <div id="cardA"></div>
+        <div id="cardB"></div>
+      </div>
+    </div>
+  </main>
+
+  <div id="siteFooter"></div>
+
+  <script src="js/data.js"></script>
+  <script src="js/storage.js"></script>
+  <script src="js/common.js"></script>
+  <script>
+    UI.mount("compare");
+
+    const labA = document.getElementById("labA");
+    const labB = document.getElementById("labB");
+
+    function fillSelect(sel, value) {
+      sel.innerHTML = LABEL_ORDER.map(lab => {
+        const meta = LABELS[lab];
+        return `<option value="${lab}">${meta.nameKo} (${meta.name})</option>`;
+      }).join("");
+      sel.value = value;
+    }
+
+    let currentA = null, currentB = null;
+
+    function pickSample(label) {
+      const arr = SAMPLES_BY_LABEL[label];
+      return arr[Math.floor(Math.random() * arr.length)];
+    }
+
+    function cardHtml(side, label, file) {
+      const meta = LABELS[label];
+      return `
+        <article class="sound-card">
+          <div class="sound-card-header">
+            <div>
+              <h2>${side}. ${UI.escapeHtml(meta.name)}</h2>
+              <div class="name-en" style="font-family:ui-monospace,monospace; font-size:12px;">${UI.escapeHtml(file)}</div>
+            </div>
+            <span class="${UI.pillFor(label)}">${UI.escapeHtml(meta.nameKo)}</span>
+          </div>
+          ${UI.audioElement(file)}
+          <div class="sound-meta">
+            <div class="meta-row"><span class="meta-label">시기</span><span class="meta-value">${UI.escapeHtml(meta.timing)}</span></div>
+            <div class="meta-row"><span class="meta-label">음높이</span><span class="meta-value">${UI.escapeHtml(meta.pitch)}</span></div>
+            <div class="meta-row"><span class="meta-label">음질</span><span class="meta-value">${UI.escapeHtml(meta.quality)}</span></div>
+          </div>
+          <div class="sound-section"><h4>임상</h4><p>${UI.escapeHtml(meta.clinical)}</p></div>
+          <div class="sound-section"><h4>감별 포인트</h4><p>${UI.escapeHtml(meta.distinguish)}</p></div>
+        </article>
+      `;
+    }
+
+    function render() {
+      currentA = pickSample(labA.value);
+      currentB = pickSample(labB.value);
+      document.getElementById("cardA").innerHTML = cardHtml("A", labA.value, currentA);
+      document.getElementById("cardB").innerHTML = cardHtml("B", labB.value, currentB);
+      Storage.recordStudy(currentA);
+      Storage.recordStudy(currentB);
+    }
+
+    function getAudios() {
+      return [
+        document.querySelector("#cardA audio"),
+        document.querySelector("#cardB audio"),
+      ].filter(Boolean);
+    }
+    function stopAll() {
+      getAudios().forEach(a => { a.pause(); a.currentTime = 0; });
+    }
+    document.getElementById("playBoth").addEventListener("click", () => {
+      stopAll(); getAudios().forEach(a => a.play().catch(() => {}));
+    });
+    document.getElementById("playAlt").addEventListener("click", async () => {
+      stopAll();
+      const [a, b] = getAudios();
+      if (!a || !b) return;
+      try { await a.play(); a.onended = () => b.play(); } catch (e) {}
+    });
+    document.getElementById("stopAll").addEventListener("click", stopAll);
+    document.getElementById("shuffleBtn").addEventListener("click", render);
+
+    labA.addEventListener("change", render);
+    labB.addEventListener("change", render);
+
+    // 프리셋
+    const presetRow = document.getElementById("presetRow");
+    presetRow.innerHTML = COMPARE_PRESETS.map((p, i) => `
+      <button class="preset-chip" data-i="${i}" title="${UI.escapeHtml(p.description)}">${UI.escapeHtml(p.title)}</button>
+    `).join("");
+    presetRow.querySelectorAll(".preset-chip").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const p = COMPARE_PRESETS[parseInt(btn.dataset.i, 10)];
+        labA.value = p.a; labB.value = p.b; render();
+      });
+    });
+
+    // 초기값
+    const first = COMPARE_PRESETS[0];
+    fillSelect(labA, first.a);
+    fillSelect(labB, first.b);
+    render();
+  </script>
+</body>
+</html>

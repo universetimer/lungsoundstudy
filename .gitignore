@@ -1,0 +1,28 @@
+# OS
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+.DS_Store
+$RECYCLE.BIN/
+
+# Editors
+.vscode/
+.idea/
+*.swp
+*~
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+
+# Logs / temp
+*.log
+*.tmp
+
+# Local-only
+.claude/settings.local.json
+
+# 앱에서 사용하지 않는 대용량 백업 데이터
+labeled wave 파일/완성본/

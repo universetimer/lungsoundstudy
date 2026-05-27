@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>퀴즈 | 청진음 학습기</title>
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css" />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <div id="siteHeader"></div>
+
+  <section class="page-hero" style="padding:36px 0 40px;">
+    <div class="container">
+      <span class="eyebrow">Quiz</span>
+      <h1 style="font-size:30px;">퀴즈 모드</h1>
+      <p>실제 임상 청진음을 듣고 라벨을 맞춰보세요. 4지선다 + 제한시간 모드.</p>
+    </div>
+  </section>
+
+  <main class="section">
+    <div class="container">
+      <!-- 설정 -->
+      <div class="quiz-setup" id="setupView">
+        <h2 class="section-title" style="margin-bottom:16px;">퀴즈 설정</h2>
+
+        <div class="field">
+          <label>문제 수</label>
+          <select id="setQuestions">
+            <option value="5">5 문제</option>
+            <option value="10" selected>10 문제</option>
+            <option value="20">20 문제</option>
+            <option value="30">30 문제</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label>출제 범위 (라벨)</label>
+          <div class="checkbox-group" id="setLabels"></div>
+        </div>
+
+        <div class="field">
+          <label>제한시간 (문항당)</label>
+          <div class="checkbox-group">
+            <label class="chip-check active" data-time="0"><input type="radio" name="time" value="0" checked /> 제한 없음</label>
+            <label class="chip-check" data-time="15"><input type="radio" name="time" value="15" /> 15초</label>
+            <label class="chip-check" data-time="30"><input type="radio" name="time" value="30" /> 30초</label>
+          </div>
+        </div>
+
+        <button class="btn btn-primary btn-block" id="startQuiz" style="margin-top:8px;">퀴즈 시작</button>
+      </div>
+
+      <!-- 진행 -->
+      <div class="quiz-panel" id="quizView" style="display:none;">
+        <div class="quiz-progress">
+          <span id="progressText"></span>
+          <span id="scoreText"></span>
+        </div>
+        <div class="quiz-bar"><div class="quiz-bar-fill" id="progressFill"></div></div>
+
+        <div class="quiz-timer" id="timer" style="display:none;"></div>
+        <div class="quiz-question">이 청진음의 라벨은?</div>
+        <div id="audioContainer"></div>
+        <div class="option-grid" id="options"></div>
+        <div class="quiz-feedback" id="feedback" style="display:none;"></div>
+
+        <div class="quiz-actions">
+          <button class="btn btn-ghost" id="quitBtn">중단하고 결과 보기</button>
+          <button class="btn btn-primary" id="nextBtn" style="display:none;">다음 문제</button>
+        </div>
+      </div>
+
+      <!-- 결과 -->
+      <div class="quiz-panel" id="resultView" style="display:none;">
+        <div class="quiz-result">
+          <div class="score" id="resultScore"></div>
+          <p id="resultText" style="margin-top:8px; color:var(--text-muted);"></p>
+          <div style="margin-top:20px; display:flex; gap:10px; justify-content:center; flex-wrap:wrap;">
+            <button class="btn btn-primary" id="retryBtn">다시 풀기</button>
+            <a href="stats.html" class="btn btn-outline">통계 보기</a>
+            <a href="catalog.html" class="btn btn-ghost">도감으로 복습</a>
+          </div>
+          <div id="missedList" style="margin-top:28px; text-align:left;"></div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <div id="siteFooter"></div>
+
+  <script src="js/data.js"></script>
+  <script src="js/storage.js"></script>
+  <script src="js/common.js"></script>
+  <script>
+    UI.mount("quiz");
+
+    // 라벨 칩
+    const labContainer = document.getElementById("setLabels");
+    labContainer.innerHTML = LABEL_ORDER.map(lab => `
+      <label class="chip-check active" data-lab="${lab}">
+        <input type="checkbox" value="${lab}" checked /> ${UI.escapeHtml(LABELS[lab].nameKo)}
+      </label>
+    `).join("");
+    labContainer.querySelectorAll(".chip-check").forEach(el => {
+      el.addEventListener("click", (e) => {
+        e.preventDefault();
+        const inp = el.querySelector("input");
+        inp.checked = !inp.checked;
+        el.classList.toggle("active", inp.checked);
+      });
+    });
+
+    document.querySelectorAll('.chip-check[data-time]').forEach(el => {
+      el.addEventListener("click", (e) => {
+        e.preventDefault();
+        document.querySelectorAll('.chip-check[data-time]').forEach(c => c.classList.remove("active"));
+        el.classList.add("active");
+        el.querySelector("input").checked = true;
+      });
+    });
+
+    let quiz = null;
+
+    function getSelectedLabels() {
+      return Array.from(labContainer.querySelectorAll('input:checked')).map(i => i.value);
+    }
+    function getSelectedTime() {
+      const el = document.querySelector('.chip-check[data-time].active');
+      return el ? parseInt(el.dataset.time, 10) : 0;
+    }
+
+    function buildQuiz() {
+      const n = parseInt(document.getElementById("setQuestions").value, 10);
+      const labels = getSelectedLabels();
+      const time = getSelectedTime();
+
+      if (labels.length < 4) {
+        alert("출제 범위에 최소 4개 라벨이 필요합니다 (4지선다).");
+        return null;
+      }
+      const pool = ALL_SAMPLES.filter(s => labels.includes(s.label));
+      if (pool.length < n) {
+        if (!confirm(`선택한 범위의 샘플 수(${pool.length})가 문제 수(${n})보다 적습니다. 중복을 허용해 계속할까요?`)) return null;
+      }
+
+      const shuffled = UI.shuffle(pool);
+      const questions = [];
+      for (let i = 0; i < n; i++) {
+        const sample = shuffled[i % shuffled.length];
+        const distractorLabels = UI.shuffle(labels.filter(l => l !== sample.label)).slice(0, 3);
+        const optLabels = UI.shuffle([sample.label, ...distractorLabels]);
+        questions.push({ sample, optLabels });
+      }
+      return { questions, index: 0, score: 0, missed: [], time, timerHandle: null, locked: false };
+    }
+
+    function startQuiz() {
+      quiz = buildQuiz();
+      if (!quiz) return;
+      document.getElementById("setupView").style.display = "none";
+      document.getElementById("resultView").style.display = "none";
+      document.getElementById("quizView").style.display = "block";
+      renderQuestion();
+    }
+
+    function renderQuestion() {
+      const q = quiz.questions[quiz.index];
+      quiz.locked = false;
+
+      document.getElementById("progressText").textContent = `${quiz.index + 1} / ${quiz.questions.length}`;
+      document.getElementById("scoreText").textContent = `정답 ${quiz.score}`;
+      document.getElementById("progressFill").style.width = (quiz.index / quiz.questions.length * 100) + "%";
+
+      document.getElementById("audioContainer").innerHTML = UI.audioElement(q.sample.file);
+
+      document.getElementById("options").innerHTML = q.optLabels.map((lab, i) => {
+        const meta = LABELS[lab];
+        return `
+          <button class="option-btn" data-lab="${lab}">
+            <strong>${String.fromCharCode(65 + i)}.</strong> ${UI.escapeHtml(meta.nameKo)}
+            <div style="font-size:12px; color:var(--text-muted); margin-top:2px;">${UI.escapeHtml(meta.name)}</div>
+          </button>
+        `;
+      }).join("");
+      document.querySelectorAll("#options .option-btn").forEach(btn => {
+        btn.addEventListener("click", () => pick(btn.dataset.lab));
+      });
+
+      document.getElementById("feedback").style.display = "none";
+      document.getElementById("nextBtn").style.display = "none";
+
+      const timerEl = document.getElementById("timer");
+      if (quiz.time > 0) {
+        let remain = quiz.time;
+        timerEl.style.display = "block";
+        timerEl.textContent = `남은 시간: ${remain}초`;
+        clearInterval(quiz.timerHandle);
+        quiz.timerHandle = setInterval(() => {
+          remain -= 1;
+          timerEl.textContent = `남은 시간: ${remain}초`;
+          if (remain <= 0) {
+            clearInterval(quiz.timerHandle);
+            if (!quiz.locked) pick(null);
+          }
+        }, 1000);
+      } else {
+        timerEl.style.display = "none";
+      }
+    }
+
+    function pick(pickedLabel) {
+      if (quiz.locked) return;
+      quiz.locked = true;
+      clearInterval(quiz.timerHandle);
+
+      const q = quiz.questions[quiz.index];
+      const correct = q.sample.label === pickedLabel;
+
+      document.querySelectorAll("#options .option-btn").forEach(b => {
+        b.classList.add("disabled");
+        if (b.dataset.lab === q.sample.label) b.classList.add("correct");
+        else if (b.dataset.lab === pickedLabel) b.classList.add("wrong");
+      });
+
+      const fb = document.getElementById("feedback");
+      fb.style.display = "block";
+      const cm = LABELS[q.sample.label];
+      if (correct) {
+        quiz.score += 1;
+        fb.className = "quiz-feedback correct";
+        fb.innerHTML = `<strong>정답!</strong> ${UI.escapeHtml(cm.name)}<br />${UI.escapeHtml(cm.distinguish)}`;
+      } else {
+        fb.className = "quiz-feedback wrong";
+        const pickedTxt = pickedLabel ? UI.escapeHtml(LABELS[pickedLabel].nameKo) : "시간 초과";
+        fb.innerHTML = `<strong>오답 — 정답은 ${UI.escapeHtml(cm.name)}</strong><br />선택: ${pickedTxt}<br />${UI.escapeHtml(cm.distinguish)}`;
+        quiz.missed.push({ file: q.sample.file, correctLabel: q.sample.label, pickedLabel });
+      }
+
+      Storage.recordAttempt(q.sample.file, q.sample.label, pickedLabel, "quiz");
+      document.getElementById("scoreText").textContent = `정답 ${quiz.score}`;
+
+      const nextBtn = document.getElementById("nextBtn");
+      nextBtn.style.display = "inline-flex";
+      nextBtn.textContent = quiz.index === quiz.questions.length - 1 ? "결과 보기" : "다음 문제";
+    }
+
+    document.getElementById("startQuiz").addEventListener("click", startQuiz);
+    document.getElementById("nextBtn").addEventListener("click", () => {
+      if (quiz.index === quiz.questions.length - 1) finish();
+      else { quiz.index += 1; renderQuestion(); }
+    });
+    document.getElementById("quitBtn").addEventListener("click", () => {
+      clearInterval(quiz.timerHandle); finish();
+    });
+    document.getElementById("retryBtn").addEventListener("click", () => {
+      document.getElementById("resultView").style.display = "none";
+      document.getElementById("setupView").style.display = "block";
+    });
+
+    function finish() {
+      clearInterval(quiz.timerHandle);
+      document.getElementById("quizView").style.display = "none";
+      document.getElementById("resultView").style.display = "block";
+
+      const total = quiz.questions.length;
+      const pct = total ? Math.round((quiz.score / total) * 100) : 0;
+      document.getElementById("resultScore").textContent = `${quiz.score} / ${total} (${pct}%)`;
+
+      let comment = "꾸준한 연습이 실력입니다.";
+      if (pct === 100) comment = "완벽! 비교 모드로 복합 라벨까지 깊이 있게 학습해 보세요.";
+      else if (pct >= 80) comment = "훌륭합니다. 오답 라벨만 도감에서 한 번 더 확인하세요.";
+      else if (pct >= 50) comment = "절반 이상! 통계 페이지에서 약점을 확인하면 효율적입니다.";
+      else comment = "도감 모드에서 기본 라벨부터 다시 듣고 오는 것을 추천합니다.";
+      document.getElementById("resultText").textContent = comment;
+
+      const missedEl = document.getElementById("missedList");
+      if (quiz.missed.length === 0) { missedEl.innerHTML = ""; return; }
+      missedEl.innerHTML = `
+        <h3 style="margin-bottom:10px;">오답 노트</h3>
+        ${quiz.missed.map(m => {
+          const cm = LABELS[m.correctLabel];
+          return `
+            <div class="sound-card" style="margin-bottom:10px; padding:14px 16px;">
+              <div class="sound-card-header" style="margin-bottom:8px;">
+                <div>
+                  <strong>${UI.escapeHtml(cm.name)}</strong>
+                  <div class="name-en" style="font-family:ui-monospace,monospace; font-size:12px;">${UI.escapeHtml(m.file)}</div>
+                </div>
+                <span class="${UI.pillFor(m.correctLabel)}">${UI.escapeHtml(cm.nameKo)}</span>
+              </div>
+              ${UI.audioElement(m.file)}
+              <p style="margin-top:8px; font-size:14px; color:var(--text-soft)">${UI.escapeHtml(cm.distinguish)}</p>
+            </div>
+          `;
+        }).join("")}
+      `;
+    }
+  </script>
+</body>
+</html>

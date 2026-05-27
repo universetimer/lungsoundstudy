@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>청진음 학습기 | Auscultation Trainer</title>
+  <meta name="description" content="271개의 라벨된 wave 파일로 청진음(crackle, wheezing, rhonchi 및 복합 라벨)을 도감·퀴즈·비교·복습 모드로 학습." />
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css" />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <div id="siteHeader"></div>
+
+  <section class="page-hero">
+    <div class="container">
+      <span class="eyebrow">Auscultation Trainer</span>
+      <h1>실제 임상 청진음으로<br />듣고 · 외우고 · 시험까지.</h1>
+      <p>라벨된 271개의 실제 청진음 wave 파일을 사용합니다. Crackle, Wheezing, Rhonchi 및 복합 라벨 6개 카테고리를 도감·퀴즈·비교·복습 모드로 학습하세요. 학습 기록은 브라우저에 자동 저장됩니다.</p>
+      <div style="margin-top:22px; display:flex; gap:10px; flex-wrap:wrap;">
+        <a href="catalog.html" class="btn btn-primary">도감 보기</a>
+        <a href="quiz.html" class="btn btn-outline" style="color:white; border-color:rgba(255,255,255,0.6);">퀴즈 시작</a>
+      </div>
+    </div>
+  </section>
+
+  <main class="section">
+    <div class="container">
+      <h2 class="section-title">학습 현황</h2>
+      <p class="section-subtitle">최근 학습 기록과 정답률 요약.</p>
+      <div class="stat-strip" id="statStrip"></div>
+
+      <h2 class="section-title" style="margin-top:48px;">학습 모드</h2>
+      <p class="section-subtitle">네 가지 모드로 다각도 학습.</p>
+      <div class="mode-grid">
+        <a href="catalog.html" class="mode-card">
+          <div class="mode-icon">📚</div>
+          <h3>도감 모드</h3>
+          <p>6개 라벨의 청진음을 듣고 특징·발생 시기·임상 의의·감별점을 학습합니다.</p>
+        </a>
+        <a href="quiz.html" class="mode-card">
+          <div class="mode-icon">📝</div>
+          <h3>퀴즈 모드</h3>
+          <p>실제 wave 파일로 출제하는 4지선다. 제한시간 모드로 실전처럼 연습.</p>
+        </a>
+        <a href="compare.html" class="mode-card">
+          <div class="mode-icon">🎧</div>
+          <h3>비교 모드</h3>
+          <p>서로 다른 라벨의 샘플을 동시·번갈아 재생하며 감별 포인트를 확인.</p>
+        </a>
+        <a href="stats.html" class="mode-card">
+          <div class="mode-icon">📊</div>
+          <h3>통계·복습</h3>
+          <p>라벨별 정답률·약점·최근 답안·기록 관리.</p>
+        </a>
+      </div>
+
+      <h2 class="section-title" style="margin-top:48px;">데이터셋 요약</h2>
+      <div class="stat-strip" id="datasetStrip"></div>
+    </div>
+  </main>
+
+  <div id="siteFooter"></div>
+
+  <script src="js/data.js"></script>
+  <script src="js/storage.js"></script>
+  <script src="js/common.js"></script>
+  <script>
+    UI.mount("home");
+
+    // 학습 현황
+    const acc = Storage.getAccuracy();
+    const state = Storage.load();
+    const studiedCount = Object.keys(state.studiedFiles).length;
+    document.getElementById("statStrip").innerHTML = `
+      <div class="stat-card">
+        <div class="label">전체 정답률</div>
+        <div class="value">${acc.total ? (acc.rate * 100).toFixed(0) + "%" : "—"}</div>
+        <div class="sub">${acc.correct}/${acc.total} 정답</div>
+      </div>
+      <div class="stat-card">
+        <div class="label">학습한 샘플</div>
+        <div class="value">${studiedCount} / ${ALL_SAMPLES.length}</div>
+        <div class="sub">도감·비교 방문 기준</div>
+      </div>
+      <div class="stat-card">
+        <div class="label">총 시도</div>
+        <div class="value">${acc.total}</div>
+        <div class="sub">정답 ${acc.correct} · 오답 ${acc.wrong}</div>
+      </div>
+      <div class="stat-card">
+        <div class="label">마지막 방문</div>
+        <div class="value" style="font-size:18px;">${state.lastVisit ? new Date(state.lastVisit).toLocaleDateString("ko-KR") : "—"}</div>
+        <div class="sub">${state.lastVisit ? new Date(state.lastVisit).toLocaleTimeString("ko-KR") : "기록 없음"}</div>
+      </div>
+    `;
+
+    // 데이터셋 요약 (라벨별 개수)
+    const counts = sampleCountByLabel();
+    document.getElementById("datasetStrip").innerHTML = LABEL_ORDER.map(lab => {
+      const meta = LABELS[lab];
+      return `
+        <div class="stat-card" style="border-top:4px solid ${meta.color}">
+          <div class="label">${UI.escapeHtml(meta.nameKo)}</div>
+          <div class="value">${counts[lab]}</div>
+          <div class="sub">${UI.escapeHtml(meta.name)}</div>
+        </div>
+      `;
+    }).join("");
+  </script>
+</body>
+</html>

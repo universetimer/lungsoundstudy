@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>도감 | 청진음 학습기</title>
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css" />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <div id="siteHeader"></div>
+
+  <section class="page-hero" style="padding:36px 0 40px;">
+    <div class="container">
+      <span class="eyebrow">Catalog</span>
+      <h1 style="font-size:30px;">청진음 도감</h1>
+      <p>6개 라벨의 실제 임상 청진음을 들으며 특징·시기·임상 의의·감별점을 학습합니다.</p>
+    </div>
+  </section>
+
+  <main class="section">
+    <div class="container catalog-layout">
+      <aside class="sidebar">
+        <h4>라벨</h4>
+        <div id="navList"></div>
+      </aside>
+
+      <div id="content"></div>
+    </div>
+  </main>
+
+  <div id="siteFooter"></div>
+
+  <script src="js/data.js"></script>
+  <script src="js/storage.js"></script>
+  <script src="js/common.js"></script>
+  <script>
+    UI.mount("catalog");
+
+    let activeLabel = "crackle";
+
+    function render() {
+      // 사이드바
+      const counts = sampleCountByLabel();
+      const navList = document.getElementById("navList");
+      navList.innerHTML = LABEL_ORDER.map(lab => {
+        const meta = LABELS[lab];
+        return `
+          <button class="nav-item ${lab === activeLabel ? "active" : ""}" data-lab="${lab}">
+            <span>${UI.escapeHtml(meta.nameKo)}</span>
+            <span class="badge">${counts[lab]}</span>
+          </button>
+        `;
+      }).join("");
+      navList.querySelectorAll(".nav-item").forEach(btn => {
+        btn.addEventListener("click", () => { activeLabel = btn.dataset.lab; render(); });
+      });
+
+      // 콘텐츠
+      const meta = LABELS[activeLabel];
+      const samples = SAMPLES_BY_LABEL[activeLabel];
+      const content = document.getElementById("content");
+      content.innerHTML = `
+        <article class="sound-card">
+          <div class="sound-card-header">
+            <div>
+              <h2>${UI.escapeHtml(meta.name)}</h2>
+              <div class="name-en">${UI.escapeHtml(meta.type)} 라벨 · ${samples.length}개 샘플</div>
+            </div>
+            <span class="${UI.pillFor(activeLabel)}">${UI.escapeHtml(meta.nameKo)}</span>
+          </div>
+          <p style="color:var(--text-soft); margin-bottom:10px;">${UI.escapeHtml(meta.short)}</p>
+          <div class="sound-meta">
+            <div class="meta-row"><span class="meta-label">음질</span><span class="meta-value">${UI.escapeHtml(meta.quality)}</span></div>
+            <div class="meta-row"><span class="meta-label">시기</span><span class="meta-value">${UI.escapeHtml(meta.timing)}</span></div>
+            <div class="meta-row"><span class="meta-label">음높이</span><span class="meta-value">${UI.escapeHtml(meta.pitch)}</span></div>
+          </div>
+          <div class="sound-section"><h4>임상 의의</h4><p>${UI.escapeHtml(meta.clinical)}</p></div>
+          <div class="sound-section"><h4>감별 포인트</h4><p>${UI.escapeHtml(meta.distinguish)}</p></div>
+          <div class="sound-section"><h4>Tip</h4><p>${UI.escapeHtml(meta.tip)}</p></div>
+        </article>
+
+        <h3 style="margin:24px 0 12px; font-size:16px; color:var(--text-soft);">샘플 ${samples.length}개</h3>
+        <div class="sample-list">
+          ${samples.map((f) => `
+            <div class="sample-item" data-file="${f}">
+              <div class="fname">${UI.escapeHtml(f)}</div>
+              ${UI.audioElement(f)}
+            </div>
+          `).join("")}
+        </div>
+      `;
+
+      // 첫 번째 샘플 자동 학습 기록
+      Storage.recordStudy(samples[0]);
+
+      // 재생되면 학습 기록
+      content.querySelectorAll(".sample-item audio").forEach(a => {
+        a.addEventListener("play", () => {
+          const file = a.closest(".sample-item").dataset.file;
+          Storage.recordStudy(file);
+        }, { once: true });
+      });
+    }
+
+    render();
+  </script>
+</body>
+</html>
