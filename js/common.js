@@ -52,7 +52,7 @@ function mount(activeKey) {
 function audioElement(file) {
   if (!file) return `<div class="audio-missing">샘플이 없습니다.</div>`;
   const src = encodeURI(audioSrc(file));
-  return `<audio controls preload="none" src="${src}"></audio>`;
+  return `<audio controls preload="none" controlsList="nodownload noplaybackrate" disablePictureInPicture oncontextmenu="return false" src="${src}"></audio>`;
 }
 
 function pillFor(label) {
