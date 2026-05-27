@@ -2,9 +2,11 @@
 function buildHeader(activeKey = "") {
   const links = [
     { key: "home", href: "index.html", label: "홈" },
+    { key: "guide", href: "guide.html", label: "청진 가이드" },
     { key: "catalog", href: "catalog.html", label: "도감" },
     { key: "quiz", href: "quiz.html", label: "퀴즈" },
     { key: "compare", href: "compare.html", label: "비교" },
+    { key: "videos", href: "videos.html", label: "영상" },
     { key: "stats", href: "stats.html", label: "통계·복습" },
   ];
   return `

@@ -119,8 +119,40 @@ img,audio { max-width:100%; display:block; }
 .stat-card .value { font-size:26px; font-weight:700; color:var(--primary-dark); }
 .stat-card .sub { font-size:13px; color:var(--text-muted); margin-top:4px; }
 
-/* ===== Catalog layout ===== */
-.catalog-layout { display:grid; grid-template-columns:280px 1fr; gap:28px; align-items:start; }
+/* ===== Catalog / Guide layout ===== */
+.catalog-layout, .guide-layout { display:grid; grid-template-columns:280px 1fr; gap:28px; align-items:start; }
+.guide-content { min-width:0; }
+.guide-toc .nav-item { font-size:13px; }
+
+/* 흉부 다이어그램 */
+.chest-diagrams { display:flex; gap:14px; flex-wrap:wrap; margin:14px 0; }
+.chest-diagrams figure { flex:1; min-width:170px; background:var(--surface-alt); border-radius:var(--radius-md); padding:10px; text-align:center; }
+.chest-diagrams figcaption { font-size:12px; color:var(--text-muted); letter-spacing:.1em; text-transform:uppercase; margin-bottom:6px; }
+.chest-diagrams svg { width:100%; height:auto; max-height:240px; }
+
+/* 가이드 테이블 */
+.guide-table { width:100%; border-collapse:collapse; font-size:14px; }
+.guide-table th, .guide-table td { text-align:left; padding:10px 12px; border-bottom:1px solid var(--border); vertical-align:top; }
+.guide-table th { background:var(--surface-alt); color:var(--text-muted); font-weight:600; font-size:12px; letter-spacing:.06em; text-transform:uppercase; }
+.guide-table tbody tr:hover { background:var(--surface-alt); }
+
+/* 체크리스트 */
+.checklist { display:grid; grid-template-columns:1fr; gap:6px; padding-left:0; }
+.checklist li { background:var(--surface-alt); border-radius:var(--radius-sm); padding:8px 12px; font-size:14px; color:var(--text-soft); }
+
+/* 동영상 그리드 */
+.video-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(320px,1fr)); gap:18px; margin-top:16px; }
+.video-card { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-md); overflow:hidden; box-shadow:var(--shadow-sm); display:flex; flex-direction:column; }
+.video-thumb { position:relative; aspect-ratio:16/9; background:#000; overflow:hidden; }
+.video-thumb iframe { position:absolute; inset:0; width:100%; height:100%; border:0; }
+.video-thumb .video-poster { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; cursor:pointer; }
+.video-thumb .play-overlay { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; cursor:pointer; transition:background .15s; }
+.video-thumb .play-overlay:hover { background:rgba(0,0,0,0.25); }
+.video-thumb .play-overlay::after { content:""; width:0; height:0; border-left:24px solid white; border-top:16px solid transparent; border-bottom:16px solid transparent; filter:drop-shadow(0 2px 4px rgba(0,0,0,0.4)); margin-left:6px; }
+.video-meta { padding:14px 16px; }
+.video-meta h3 { font-size:15px; font-weight:600; line-height:1.4; margin-bottom:6px; }
+.video-meta .video-desc { font-size:13px; color:var(--text-muted); line-height:1.5; }
+.video-meta .video-tag { display:inline-block; font-size:11px; padding:2px 8px; border-radius:var(--radius-pill); background:var(--surface-alt); color:var(--primary); font-weight:600; margin-bottom:8px; letter-spacing:.04em; }
 .sidebar {
   background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-md);
   padding:18px; position:sticky; top:88px;
