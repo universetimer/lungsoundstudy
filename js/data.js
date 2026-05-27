@@ -1,13 +1,13 @@
 /* ============================================================
  * 청진음 학습 데이터 (labeled_wave_manifest.csv 기반, 271 샘플)
  * ------------------------------------------------------------
- * 음원은 ../labeled wave 파일/{filename}.wav 에서 로드.
+ * 음원은 sounds/{filename}.wav 에서 로드.
  * 라벨 분포:
  *   crackle 140, wheezing 66, crackle_wheezing 23,
  *   rhonchi 22, wheezing_rhonchi 13, crackle_rhonchi 7
  * ============================================================ */
 
-const AUDIO_BASE = "../labeled wave 파일/";
+const AUDIO_BASE = "sounds/";
 
 /* 라벨별 메타데이터 — 학습 카드에 표시 */
 const LABELS = {

@@ -6,16 +6,13 @@
 
 ```
 .
-├── labeled wave 파일/        ← 271 wav + 매니페스트 CSV
-└── 청진음 분석 하는 앱/      ← 웹 앱 (HTML/CSS/JS)
-    ├── index.html
-    ├── catalog.html
-    ├── quiz.html
-    ├── compare.html
-    ├── stats.html
-    ├── css/style.css
-    └── js/{data.js, storage.js, common.js}
+├── index.html, catalog.html, quiz.html, compare.html, stats.html
+├── css/style.css
+├── js/{data.js, storage.js, common.js}
+└── sounds/        ← 271 wav + 매니페스트 CSV
 ```
+
+> 라이브 사이트: <https://lungsoundstudy.com> (Cloudflare Pages)
 
 ## 데이터셋
 
@@ -29,14 +26,16 @@
 | crackle_rhonchi | 7 |
 | **합계** | **271** |
 
-## 실행
-
-루트 폴더에서 정적 서버를 띄웁니다.
+## 로컬 실행
 
 ```powershell
 python -m http.server 8770
-# → http://localhost:8770/청진음 분석 하는 앱/
+# → http://localhost:8770/
 ```
+
+## 배포
+
+Cloudflare Pages가 `main` 브랜치 푸시마다 자동 빌드/배포합니다. 빌드 명령은 필요 없으며 (정적 사이트), 출력 디렉토리는 저장소 루트(`/`)입니다.
 
 ## 모드
 
