@@ -52,7 +52,15 @@ function mount(activeKey) {
 function audioElement(file) {
   if (!file) return `<div class="audio-missing">샘플이 없습니다.</div>`;
   const src = encodeURI(audioSrc(file));
-  return `<audio controls preload="none" controlsList="nodownload noplaybackrate" disablePictureInPicture oncontextmenu="return false" src="${src}"></audio>`;
+  return `<div class="audio-wrap">
+    <audio controls preload="none" controlsList="nodownload noplaybackrate" disablePictureInPicture oncontextmenu="return false" src="${src}"></audio>
+    <div class="audio-viz">
+      <canvas class="wf-canvas" title="파형 — 클릭으로 시킹"></canvas>
+      <canvas class="sg-canvas" title="스펙트로그램 — 클릭으로 시킹"></canvas>
+      <div class="audio-playhead"></div>
+      <div class="audio-viz-hint">▶ 재생을 누르면 파형과 스펙트로그램이 표시됩니다</div>
+    </div>
+  </div>`;
 }
 
 function pillFor(label) {
