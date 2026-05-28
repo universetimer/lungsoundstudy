@@ -149,27 +149,36 @@
       win[i] = 0.5 * (1 - Math.cos(2 * Math.PI * i / (fftSize - 1)));
     }
 
+    // 자동 정규화 — 폐음은 진폭이 매우 작아 미정규화 시 dB가 한 곳에 몰려 보이지 않음.
+    let peak = 1e-9;
+    for (let i = 0; i < samples.length; i++) {
+      const v = samples[i] < 0 ? -samples[i] : samples[i];
+      if (v > peak) peak = v;
+    }
+    const norm = 1 / peak;
+
     // STFT
     const spec = new Float32Array(numFrames * halfFft);
     const re = new Float32Array(fftSize);
-    let maxDb = -Infinity;
+    let maxDb = -Infinity, minDb = Infinity;
     for (let f = 0; f < numFrames; f++) {
       const start = f * hop;
-      for (let i = 0; i < fftSize; i++) re[i] = samples[start + i] * win[i];
+      for (let i = 0; i < fftSize; i++) re[i] = samples[start + i] * norm * win[i];
       const r = fft(re);
       for (let k = 0; k < halfFft; k++) {
         const mag = Math.sqrt(r.re[k] * r.re[k] + r.im[k] * r.im[k]);
         const db = 20 * Math.log10(mag + 1e-9);
         spec[f * halfFft + k] = db;
         if (db > maxDb) maxDb = db;
+        if (db < minDb && db > -120) minDb = db;
       }
-      // 각 프레임마다 다시 re/im을 재사용 (fft가 in-place라 다음 루프 시작에 덮어쓰기됨)
     }
-    const dyn = 60;
+    // 신호 범위에 맞춰 다이내믹 레인지 자동 산출 (30~70 dB 사이)
+    const observed = maxDb - minDb;
+    const dyn = Math.max(30, Math.min(70, observed > 0 ? observed * 0.85 : 50));
     const floorDb = maxDb - dyn;
 
-    // 폐음 정보는 대부분 0~2 kHz. 너무 높은 주파수까지 모두 보여주면 정보가 압축됨.
-    // 표시는 sample_rate/2의 절반(즉 Nyquist의 1/2)까지만으로 잘라 학습성↑
+    // 표시 주파수 상한 — Nyquist의 절반 (폐음 정보 대역)
     const displayBins = Math.min(halfFft, Math.max(64, halfFft >> 1));
 
     // ImageData 렌더
