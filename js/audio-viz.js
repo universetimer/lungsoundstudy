@@ -149,7 +149,18 @@
       win[i] = 0.5 * (1 - Math.cos(2 * Math.PI * i / (fftSize - 1)));
     }
 
-    // 자동 정규화 — 폐음은 진폭이 매우 작아 미정규화 시 dB가 한 곳에 몰려 보이지 않음.
+    // 표시 주파수 상한: 500 Hz — 폐음 정보 대역(정상 호흡음/rhonchi/wheeze 기본형)
+    // 폐음의 95% 이상이 이 대역에 집중. 더 높은 주파수는 거의 무음이라 압축돼 보였음.
+    const MAX_DISPLAY_HZ = 500;
+    let displayBins;
+    if (sampleRate && sampleRate > 0) {
+      const binFreq = (sampleRate / 2) / halfFft;
+      displayBins = Math.max(8, Math.min(halfFft, Math.ceil(MAX_DISPLAY_HZ / binFreq)));
+    } else {
+      displayBins = Math.max(8, halfFft >> 4); // ~16 bins fallback
+    }
+
+    // 자동 정규화 — peak를 1.0으로
     let peak = 1e-9;
     for (let i = 0; i < samples.length; i++) {
       const v = samples[i] < 0 ? -samples[i] : samples[i];
@@ -157,43 +168,61 @@
     }
     const norm = 1 / peak;
 
-    // STFT
-    const spec = new Float32Array(numFrames * halfFft);
+    // STFT — displayBins만 저장(메모리 절약)
+    const spec = new Float32Array(numFrames * displayBins);
     const re = new Float32Array(fftSize);
-    let maxDb = -Infinity, minDb = Infinity;
     for (let f = 0; f < numFrames; f++) {
       const start = f * hop;
       for (let i = 0; i < fftSize; i++) re[i] = samples[start + i] * norm * win[i];
       const r = fft(re);
-      for (let k = 0; k < halfFft; k++) {
+      for (let k = 0; k < displayBins; k++) {
         const mag = Math.sqrt(r.re[k] * r.re[k] + r.im[k] * r.im[k]);
-        const db = 20 * Math.log10(mag + 1e-9);
-        spec[f * halfFft + k] = db;
-        if (db > maxDb) maxDb = db;
-        if (db < minDb && db > -120) minDb = db;
+        spec[f * displayBins + k] = 20 * Math.log10(mag + 1e-9);
       }
     }
-    // 신호 범위에 맞춰 다이내믹 레인지 자동 산출 (30~70 dB 사이)
-    const observed = maxDb - minDb;
-    const dyn = Math.max(30, Math.min(70, observed > 0 ? observed * 0.85 : 50));
-    const floorDb = maxDb - dyn;
 
-    // 표시 주파수 상한 — Nyquist의 절반 (폐음 정보 대역)
-    const displayBins = Math.min(halfFft, Math.max(64, halfFft >> 1));
+    // 히스토그램 기반 백분위 정규화 — 10번째 백분위를 floor, 99번째를 ceiling
+    // 이 방법은 노이즈 한 점 때문에 콘트라스트가 무너지는 걸 방지
+    const H_BINS = 200, H_MIN = -120, H_MAX = 10;
+    const hist = new Int32Array(H_BINS);
+    for (let i = 0; i < spec.length; i++) {
+      const db = spec[i];
+      const t = (db - H_MIN) / (H_MAX - H_MIN);
+      if (t < 0 || t > 1) continue;
+      hist[Math.min(H_BINS - 1, (t * H_BINS) | 0)]++;
+    }
+    let cum = 0;
+    const total = spec.length;
+    let floorDb = H_MIN, ceilDb = H_MAX;
+    let floorSet = false;
+    for (let b = 0; b < H_BINS; b++) {
+      cum += hist[b];
+      const p = cum / total;
+      const db = H_MIN + (b + 0.5) / H_BINS * (H_MAX - H_MIN);
+      if (!floorSet && p >= 0.10) { floorDb = db; floorSet = true; }
+      if (p >= 0.99) { ceilDb = db; break; }
+    }
+    const dyn = Math.max(20, ceilDb - floorDb);
 
-    // ImageData 렌더
+    console.debug("[spectrogram]", {
+      sampleRate, peak: peak.toFixed(4),
+      floorDb: floorDb.toFixed(1), ceilDb: ceilDb.toFixed(1), dyn: dyn.toFixed(1),
+      displayBins, halfFft,
+      displayHz: sampleRate ? Math.round(displayBins * (sampleRate / 2) / halfFft) : "?",
+    });
+
+    // 렌더 — y=0(top)=가장 높은 주파수, y=h(bottom)=DC
     const img = ctx.createImageData(w, h);
     const data = img.data;
     for (let x = 0; x < w; x++) {
       const f = Math.min(numFrames - 1, ((x / w) * numFrames) | 0);
-      const base = f * halfFft;
+      const base = f * displayBins;
       for (let y = 0; y < h; y++) {
-        // y=0(top): 가장 높은 주파수, y=h-1(bottom): DC
-        const k = ((1 - y / h) * displayBins) | 0;
-        const kc = k >= halfFft ? halfFft - 1 : k;
-        const db = spec[base + kc];
-        const t = (db - floorDb) / dyn;
-        const c = magma(t < 0 ? 0 : t > 1 ? 1 : t);
+        const k = Math.min(displayBins - 1, Math.max(0, ((1 - y / h) * displayBins) | 0));
+        const db = spec[base + k];
+        let t = (db - floorDb) / dyn;
+        if (t < 0) t = 0; else if (t > 1) t = 1;
+        const c = magma(t);
         const idx = (y * w + x) * 4;
         data[idx] = c[0];
         data[idx + 1] = c[1];
