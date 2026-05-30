@@ -149,16 +149,21 @@
       win[i] = 0.5 * (1 - Math.cos(2 * Math.PI * i / (fftSize - 1)));
     }
 
-    // 표시 주파수 상한: 500 Hz — 폐음 정보 대역(정상 호흡음/rhonchi/wheeze 기본형)
-    // 폐음의 95% 이상이 이 대역에 집중. 더 높은 주파수는 거의 무음이라 압축돼 보였음.
+    // 표시 주파수 범위: 50 ~ 500 Hz — 폐음 정보 대역
+    // 50 Hz 이하: DC bias·신체 움직임·HVAC 잡음 제외
+    // 500 Hz 이상: 폐음 정보 거의 없음, 화면 압축 방지
+    const MIN_DISPLAY_HZ = 50;
     const MAX_DISPLAY_HZ = 500;
-    let displayBins;
+    let startBin, endBin;
     if (sampleRate && sampleRate > 0) {
       const binFreq = (sampleRate / 2) / halfFft;
-      displayBins = Math.max(8, Math.min(halfFft, Math.ceil(MAX_DISPLAY_HZ / binFreq)));
+      startBin = Math.max(1, Math.floor(MIN_DISPLAY_HZ / binFreq));
+      endBin = Math.max(startBin + 8, Math.min(halfFft, Math.ceil(MAX_DISPLAY_HZ / binFreq)));
     } else {
-      displayBins = Math.max(8, halfFft >> 4); // ~16 bins fallback
+      startBin = 2;
+      endBin = Math.max(startBin + 8, halfFft >> 4);
     }
+    const displayBins = endBin - startBin;
 
     // 자동 정규화 — peak를 1.0으로
     let peak = 1e-9;
@@ -168,7 +173,7 @@
     }
     const norm = 1 / peak;
 
-    // STFT — displayBins만 저장(메모리 절약)
+    // STFT — startBin~endBin 사이의 bin만 spec에 저장(DC bias 제외 + 메모리 절약)
     const spec = new Float32Array(numFrames * displayBins);
     const re = new Float32Array(fftSize);
     for (let f = 0; f < numFrames; f++) {
@@ -176,7 +181,8 @@
       for (let i = 0; i < fftSize; i++) re[i] = samples[start + i] * norm * win[i];
       const r = fft(re);
       for (let k = 0; k < displayBins; k++) {
-        const mag = Math.sqrt(r.re[k] * r.re[k] + r.im[k] * r.im[k]);
+        const kAbs = startBin + k;
+        const mag = Math.sqrt(r.re[kAbs] * r.re[kAbs] + r.im[kAbs] * r.im[kAbs]);
         spec[f * displayBins + k] = 20 * Math.log10(mag + 1e-9);
       }
     }
@@ -207,8 +213,8 @@
     console.debug("[spectrogram]", {
       sampleRate, peak: peak.toFixed(4),
       floorDb: floorDb.toFixed(1), ceilDb: ceilDb.toFixed(1), dyn: dyn.toFixed(1),
-      displayBins, halfFft,
-      displayHz: sampleRate ? Math.round(displayBins * (sampleRate / 2) / halfFft) : "?",
+      startBin, endBin, displayBins, halfFft,
+      displayHz: sampleRate ? `${Math.round(startBin * sampleRate / 2 / halfFft)}-${Math.round(endBin * sampleRate / 2 / halfFft)}` : "?",
     });
 
     // 렌더 — y=0(top)=가장 높은 주파수, y=h(bottom)=DC

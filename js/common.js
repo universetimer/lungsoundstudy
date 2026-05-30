@@ -71,10 +71,10 @@ function audioElement(file) {
     <audio controls preload="none" controlsList="nodownload noplaybackrate" disablePictureInPicture oncontextmenu="return false" src="${src}"></audio>
     <div class="audio-viz">
       <canvas class="wf-canvas" title="파형(Waveform) — 시간×진폭, 클릭으로 시킹"></canvas>
-      <canvas class="sg-canvas" title="스펙트로그램(Spectrogram) — 시간×주파수(0~500 Hz)×강도, 클릭으로 시킹"></canvas>
+      <canvas class="sg-canvas" title="스펙트로그램(Spectrogram) — 시간×주파수(50~500 Hz)×강도, 클릭으로 시킹"></canvas>
       <div class="audio-playhead"></div>
       <span class="viz-label viz-label-wf">파형 · WAVEFORM</span>
-      <span class="viz-label viz-label-sg">스펙트로그램 · 0–500 Hz</span>
+      <span class="viz-label viz-label-sg">스펙트로그램 · 50–500 Hz</span>
       <div class="audio-viz-hint">▶ 재생을 누르면 파형과 스펙트로그램이 표시됩니다</div>
     </div>
   </div>`;
