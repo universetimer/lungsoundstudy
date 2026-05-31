@@ -86,6 +86,45 @@ img,audio { max-width:100%; display:block; }
 .lang-btn:hover { color:var(--text); }
 .lang-btn.active { background:var(--primary); color:white; }
 
+/* Lung Study Lab 채널 hero */
+.lsl-hero {
+  background:linear-gradient(135deg, #1f0a1a 0%, #4c0820 60%, #7a0030 100%);
+  color:white; border-radius:var(--radius-md);
+  padding:24px 28px; margin-bottom:24px;
+  display:flex; flex-wrap:wrap; gap:20px;
+  align-items:center; justify-content:space-between;
+}
+.lsl-hero-info { display:flex; gap:16px; align-items:center; flex:1; min-width:280px; }
+.lsl-hero-info h2 { color:white; }
+.lsl-hero-info p { color:rgba(255,255,255,0.85); }
+.lsl-hero-info code { color:rgba(255,255,255,0.7); background:rgba(255,255,255,0.08); padding:2px 6px; border-radius:4px; }
+.lsl-hero-mark {
+  width:64px; height:64px; border-radius:var(--radius-md);
+  background:rgba(255,255,255,0.1); display:grid; place-items:center;
+  flex-shrink:0;
+}
+.lsl-hero-actions { display:flex; flex-wrap:wrap; gap:8px; }
+.lsl-hero .btn-outline { color:white; border-color:rgba(255,255,255,0.5); }
+.lsl-hero .btn-outline:hover { background:rgba(255,255,255,0.1); border-color:white; color:white; }
+
+/* Shorts grid (세로 9:16) */
+.shorts-grid {
+  display:grid; gap:14px;
+  grid-template-columns:repeat(auto-fill, minmax(150px, 1fr));
+}
+.shorts-card { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-md); overflow:hidden; }
+.shorts-thumb { position:relative; aspect-ratio:9/16; background:#0f172a; overflow:hidden; }
+.shorts-thumb img { width:100%; height:100%; object-fit:cover; }
+.shorts-thumb iframe { width:100%; height:100%; border:0; }
+.shorts-title { padding:8px 10px; font-size:13px; line-height:1.35; }
+
+/* 빈 섹션 안내 */
+.empty-hint {
+  background:var(--surface-alt); border:1px dashed var(--border-strong);
+  border-radius:var(--radius-md); padding:16px 18px;
+  font-size:13px; color:var(--text-muted); line-height:1.55;
+}
+
 /* 페이지별 lang 표시 전환 */
 html[lang="en"] [data-lang-ko] { display:none !important; }
 html[lang="ko"] [data-lang-en] { display:none !important; }

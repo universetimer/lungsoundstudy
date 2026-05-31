@@ -31,7 +31,7 @@
 
   <link rel="preconnect" href="https://www.youtube.com" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css" />
-  <link rel="stylesheet" href="css/style.css?v=9" />
+  <link rel="stylesheet" href="css/style.css?v=10" />
 </head>
 <body>
   <div id="siteHeader"></div>
@@ -47,11 +47,49 @@
   <main class="section">
     <div class="container">
 
-      <div class="checkbox-group" id="catFilter" style="margin-bottom:18px;"></div>
+      <!-- Lung Study Lab 채널 카드 -->
+      <section class="lsl-hero">
+        <div class="lsl-hero-info">
+          <div class="lsl-hero-mark">
+            <svg viewBox="0 0 44 44" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" style="width:54px; height:54px;">
+              <defs>
+                <linearGradient id="lslGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stop-color="#FF0033" />
+                  <stop offset="100%" stop-color="#7C2D6F" />
+                </linearGradient>
+              </defs>
+              <circle cx="22" cy="22" r="20" fill="url(#lslGrad)" />
+              <polygon points="18,15 18,29 30,22" fill="white" />
+            </svg>
+          </div>
+          <div>
+            <h2 style="font-size:22px; margin-bottom:4px;" data-i18n="videos.section.lsl"></h2>
+            <p style="color:var(--text-muted); font-size:14px;" data-i18n="videos.section.lsl.sub"></p>
+            <code style="font-size:12px; color:var(--text-muted);">youtube.com/@universe79</code>
+          </div>
+        </div>
+        <div class="lsl-hero-actions">
+          <a href="https://www.youtube.com/@universe79" target="_blank" rel="noopener" class="btn btn-primary">
+            <span data-i18n="videos.lsl.channel"></span> ↗
+          </a>
+          <a href="https://www.youtube.com/@universe79/videos" target="_blank" rel="noopener" class="btn btn-outline">
+            <span data-i18n="videos.lsl.videos"></span> ↗
+          </a>
+          <a href="https://www.youtube.com/@universe79/shorts" target="_blank" rel="noopener" class="btn btn-outline">
+            <span data-i18n="videos.lsl.shorts"></span> ↗
+          </a>
+        </div>
+      </section>
 
-      <h2 class="section-title" data-i18n="videos.section.lsl"></h2>
-      <p class="section-subtitle" id="lslNote" data-i18n="videos.section.lsl.sub"></p>
+      <h2 class="section-title" style="margin-top:32px;" data-i18n="videos.section.lslvids"></h2>
+      <p class="section-subtitle" data-i18n="videos.section.lslvids.sub"></p>
       <div class="video-grid" id="lslGrid"></div>
+
+      <h2 class="section-title" style="margin-top:32px;" data-i18n="videos.section.lslshorts"></h2>
+      <p class="section-subtitle" data-i18n="videos.section.lslshorts.sub"></p>
+      <div class="shorts-grid" id="lslShortsGrid"></div>
+
+      <div class="checkbox-group" id="catFilter" style="margin:24px 0 18px;"></div>
 
       <h2 class="section-title" style="margin-top:40px;" data-i18n="videos.section.curated"></h2>
       <p class="section-subtitle" data-i18n="videos.section.curated.sub"></p>
@@ -93,27 +131,28 @@
 
   <div id="siteFooter"></div>
 
-  <script src="js/i18n.js?v=9"></script>
-  <script src="js/data.js?v=9"></script>
-  <script src="js/storage.js?v=9"></script>
-  <script src="js/common.js?v=9"></script>
-  <script src="js/audio-viz.js?v=9"></script>
+  <script src="js/i18n.js?v=10"></script>
+  <script src="js/data.js?v=10"></script>
+  <script src="js/storage.js?v=10"></script>
+  <script src="js/common.js?v=10"></script>
+  <script src="js/audio-viz.js?v=10"></script>
   <script>
     UI.mount("videos");
 
+    /* Lung Study Lab (universe79) 영상 — 영상 URL을 받으면 아래 배열을 채우면 됨.
+       각 항목: { id, title, desc, tag } — title/desc는 { ko, en } 객체. */
     const LSL_VIDEOS = [
-      { id: "wE-xzCh8DpM",
-        title: { ko: "Lung sounds made easy", en: "Lung sounds made easy" },
-        desc:  { ko: "정상/비정상 폐음을 짧고 시각적으로 정리.", en: "Visual summary of normal and abnormal lung sounds." },
-        tag:   { ko: "기초", en: "Basics" } },
-      { id: "rr_saH-iKSY",
-        title: { ko: "Breath Sounds in 5 Minutes", en: "Breath Sounds in 5 Minutes" },
-        desc:  { ko: "5분 안에 핵심 폐음 패턴 훑기.", en: "Key lung sound patterns in 5 minutes." },
-        tag:   { ko: "요약", en: "Quick review" } },
-      { id: "xddT24a5XYc",
-        title: { ko: "Lung sounds | Auscultation", en: "Lung sounds | Auscultation" },
-        desc:  { ko: "UKMLA/CPSA/PLAB 시험 대비 — 사례 중심.", en: "Case-based for UKMLA/CPSA/PLAB exams." },
-        tag:   { ko: "사례", en: "Cases" } },
+      // 예시:
+      // { id: "XXXXXXXXXXX",
+      //   title: { ko: "한국어 제목", en: "English title" },
+      //   desc:  { ko: "한 줄 설명", en: "Short description" },
+      //   tag:   { ko: "기초", en: "Basics" } },
+    ];
+
+    /* Shorts — 60초 이내의 짧은 클립 (세로 9:16). YouTube /shorts/ ID. */
+    const LSL_SHORTS = [
+      // { id: "XXXXXXXXXXX",
+      //   title: { ko: "Shorts 제목", en: "Shorts title" } },
     ];
 
     const CURATED = [
@@ -163,20 +202,47 @@
     function render() {
       const tag = selectedTag();
       const matches = v => tag === "_all" || tf(v.tag) === tag;
-      renderGrid("lslGrid", LSL_VIDEOS.filter(matches));
+      renderGrid("lslGrid", LSL_VIDEOS.filter(matches), { showAddHint: true });
       renderGrid("curatedGrid", CURATED.filter(matches));
+      renderShorts("lslShortsGrid", LSL_SHORTS);
     }
 
-    function renderGrid(targetId, list) {
+    function renderGrid(targetId, list, opts) {
+      opts = opts || {};
       const el = document.getElementById(targetId);
       if (list.length === 0) {
-        const msg = _lang() === "ko" ? "해당 태그에 영상이 없습니다." : "No videos for this tag.";
-        el.innerHTML = `<div class="weak-row"><span class="meta">${msg}</span><span></span><span></span></div>`;
+        const msg = opts.showAddHint
+          ? I18n.t("videos.empty.add")
+          : (_lang() === "ko" ? "해당 태그에 영상이 없습니다." : "No videos for this tag.");
+        el.innerHTML = `<div class="empty-hint"><span>${UI.escapeHtml(msg)}</span></div>`;
         return;
       }
       el.innerHTML = list.map(v => videoCard(v)).join("");
       el.querySelectorAll(".play-overlay").forEach(btn => {
         btn.addEventListener("click", () => loadIframe(btn.closest(".video-thumb"), btn.dataset.id, btn.dataset.playlist === "1"));
+      });
+    }
+
+    function renderShorts(targetId, list) {
+      const el = document.getElementById(targetId);
+      if (list.length === 0) {
+        el.innerHTML = `<div class="empty-hint"><span>${UI.escapeHtml(I18n.t("videos.empty.add"))}</span></div>`;
+        return;
+      }
+      el.innerHTML = list.map(v => {
+        const title = tf(v.title) || "";
+        return `
+          <article class="shorts-card">
+            <div class="shorts-thumb" data-id="${v.id}">
+              <img class="video-poster" src="https://i.ytimg.com/vi/${v.id}/hqdefault.jpg" alt="${UI.escapeHtml(title)}" loading="lazy" />
+              <button class="play-overlay" aria-label="Play" data-id="${v.id}" data-shorts="1"></button>
+            </div>
+            <div class="shorts-title">${UI.escapeHtml(title)}</div>
+          </article>
+        `;
+      }).join("");
+      el.querySelectorAll(".play-overlay").forEach(btn => {
+        btn.addEventListener("click", () => loadIframe(btn.closest(".shorts-thumb"), btn.dataset.id, false));
       });
     }
 
