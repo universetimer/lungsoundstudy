@@ -1,18 +1,18 @@
 /* 공통 UI */
 function buildHeader(activeKey = "") {
   const links = [
-    { key: "home", href: "index.html", label: "홈" },
-    { key: "guide", href: "guide.html", label: "청진 가이드" },
-    { key: "catalog", href: "catalog.html", label: "도감" },
-    { key: "quiz", href: "quiz.html", label: "퀴즈" },
-    { key: "compare", href: "compare.html", label: "비교" },
-    { key: "videos", href: "videos.html", label: "영상" },
-    { key: "stats", href: "stats.html", label: "통계·복습" },
+    { key: "home", href: "index.html", i18n: "nav.home" },
+    { key: "guide", href: "guide.html", i18n: "nav.guide" },
+    { key: "catalog", href: "catalog.html", i18n: "nav.catalog" },
+    { key: "quiz", href: "quiz.html", i18n: "nav.quiz" },
+    { key: "compare", href: "compare.html", i18n: "nav.compare" },
+    { key: "videos", href: "videos.html", i18n: "nav.videos" },
+    { key: "stats", href: "stats.html", i18n: "nav.stats" },
   ];
   return `
     <header class="site-header">
       <div class="container header-inner">
-        <a href="index.html" class="brand" aria-label="Lung Sound Study 홈">
+        <a href="index.html" class="brand" aria-label="Lung Sound Study">
           <svg class="brand-logo" viewBox="0 0 44 44" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
             <defs>
               <linearGradient id="lssGrad" x1="0%" y1="0%" x2="100%" y2="100%">
@@ -29,15 +29,19 @@ function buildHeader(activeKey = "") {
           </svg>
           <div class="brand-text">
             <strong>Lung Sound Study</strong>
-            <span>청진음 학습 · Auscultation Trainer</span>
+            <span data-i18n="brand.tag">청진음 학습 · Auscultation Trainer</span>
           </div>
         </a>
         <nav class="main-nav" id="mainNav">
           <ul>
-            ${links.map(l => `<li><a href="${l.href}" class="${l.key===activeKey?"active":""}">${l.label}</a></li>`).join("")}
+            ${links.map(l => `<li><a href="${l.href}" data-i18n="${l.i18n}" class="${l.key===activeKey?"active":""}"></a></li>`).join("")}
           </ul>
         </nav>
-        <button class="mobile-toggle" id="navToggle" aria-label="메뉴">
+        <div class="lang-toggle" role="group" aria-label="Language">
+          <button class="lang-btn" data-lang="ko" type="button">한</button>
+          <button class="lang-btn" data-lang="en" type="button">EN</button>
+        </div>
+        <button class="mobile-toggle" id="navToggle" aria-label="menu">
           <span></span><span></span><span></span>
         </button>
       </div>
@@ -48,8 +52,8 @@ function buildFooter() {
   return `
     <footer class="site-footer">
       <div class="container">
-        <span>© 청진음 학습기 · 학습 목적 자료</span>
-        <span>271개 라벨된 wave 파일 기반 · 임상 판단을 대체하지 않습니다.</span>
+        <span data-i18n="footer.copyright"></span>
+        <span data-i18n="footer.disclaimer"></span>
       </div>
     </footer>`;
 }
@@ -59,29 +63,54 @@ function mount(activeKey) {
   if (h) h.innerHTML = buildHeader(activeKey);
   const f = document.getElementById("siteFooter");
   if (f) f.innerHTML = buildFooter();
+
   const toggle = document.getElementById("navToggle");
   const nav = document.getElementById("mainNav");
   if (toggle && nav) toggle.addEventListener("click", () => nav.classList.toggle("open"));
+
+  // Language toggle
+  if (window.I18n) {
+    document.querySelectorAll(".lang-btn").forEach(btn => {
+      btn.classList.toggle("active", btn.dataset.lang === window.I18n.current());
+      btn.addEventListener("click", () => window.I18n.setLang(btn.dataset.lang));
+    });
+    window.I18n.apply();
+  }
 }
 
 function audioElement(file) {
-  if (!file) return `<div class="audio-missing">샘플이 없습니다.</div>`;
+  if (!file) return `<div class="audio-missing">—</div>`;
   const src = encodeURI(audioSrc(file));
+  const lang = (window.I18n && window.I18n.current()) || "ko";
+  const wfLabel = lang === "ko" ? "파형 · WAVEFORM" : "WAVEFORM";
+  const sgLabel = lang === "ko" ? "스펙트로그램 · 50–500 Hz" : "SPECTROGRAM · 50–500 Hz";
+  const hint = lang === "ko" ? "▶ 재생을 누르면 파형과 스펙트로그램이 표시됩니다" : "▶ Press play to render waveform and spectrogram";
   return `<div class="audio-wrap">
     <audio controls preload="none" controlsList="nodownload noplaybackrate" disablePictureInPicture oncontextmenu="return false" src="${src}"></audio>
     <div class="audio-viz">
-      <canvas class="wf-canvas" title="파형(Waveform) — 시간×진폭, 클릭으로 시킹"></canvas>
-      <canvas class="sg-canvas" title="스펙트로그램(Spectrogram) — 시간×주파수(50~500 Hz)×강도, 클릭으로 시킹"></canvas>
+      <canvas class="wf-canvas"></canvas>
+      <canvas class="sg-canvas"></canvas>
       <div class="audio-playhead"></div>
-      <span class="viz-label viz-label-wf">파형 · WAVEFORM</span>
-      <span class="viz-label viz-label-sg">스펙트로그램 · 50–500 Hz</span>
-      <div class="audio-viz-hint">▶ 재생을 누르면 파형과 스펙트로그램이 표시됩니다</div>
+      <span class="viz-label viz-label-wf">${wfLabel}</span>
+      <span class="viz-label viz-label-sg">${sgLabel}</span>
+      <div class="audio-viz-hint">${hint}</div>
     </div>
   </div>`;
 }
 
 function pillFor(label) {
   return `category-pill pill-${label.replace(/_/g, "-")}`;
+}
+
+function labelName(meta) {
+  const lang = (window.I18n && window.I18n.current()) || "ko";
+  return lang === "ko" ? meta.nameKo : (meta.nameEn || meta.name);
+}
+
+function labelField(meta, field) {
+  const lang = (window.I18n && window.I18n.current()) || "ko";
+  if (lang === "en" && meta[field + "En"]) return meta[field + "En"];
+  return meta[field];
 }
 
 function shuffle(arr) {
@@ -99,5 +128,5 @@ function escapeHtml(s) {
 }
 
 if (typeof window !== "undefined") {
-  window.UI = { mount, audioElement, pillFor, shuffle, escapeHtml };
+  window.UI = { mount, audioElement, pillFor, labelName, labelField, shuffle, escapeHtml };
 }

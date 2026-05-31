@@ -76,6 +76,20 @@ img,audio { max-width:100%; display:block; }
 }
 .main-nav a:hover, .main-nav a.active { background:var(--surface-alt); color:var(--primary); }
 
+/* 언어 토글 */
+.lang-toggle { display:flex; gap:0; margin-left:8px; border:1px solid var(--border); border-radius:var(--radius-pill); overflow:hidden; background:var(--surface-alt); }
+.lang-btn {
+  padding:5px 12px; font-size:12px; font-weight:600; letter-spacing:0.04em;
+  color:var(--text-muted); background:transparent; border:none; cursor:pointer;
+  transition:background .15s, color .15s;
+}
+.lang-btn:hover { color:var(--text); }
+.lang-btn.active { background:var(--primary); color:white; }
+
+/* 페이지별 lang 표시 전환 */
+html[lang="en"] [data-lang-ko] { display:none !important; }
+html[lang="ko"] [data-lang-en] { display:none !important; }
+
 /* ===== Page hero ===== */
 .page-hero {
   background:linear-gradient(135deg,#073F62 0%,#0E5A8A 60%,#14B8A6 130%);

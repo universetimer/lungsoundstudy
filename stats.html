@@ -3,20 +3,20 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>통계·복습 | 청진음 학습기</title>
+  <title>Stats &amp; Review | Lung Sound Study</title>
 
   <link rel="preconnect" href="https://cdn.jsdelivr.net" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css" />
-  <link rel="stylesheet" href="css/style.css?v=8" />
+  <link rel="stylesheet" href="css/style.css?v=9" />
   <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png" />
   <link rel="icon" type="image/png" sizes="192x192" href="favicon-192.png" />
   <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png" />
   <meta name="theme-color" content="#0E5A8A" />
 
   <meta property="og:type" content="website" />
-  <meta property="og:site_name" content="청진음 학습기" />
-  <meta property="og:title" content="통계·복습 | 청진음 학습기" />
-  <meta property="og:description" content="학습 기록·정답률·약점 라벨을 한눈에 보고 자동 복습." />
+  <meta property="og:site_name" content="Lung Sound Study" />
+  <meta property="og:title" content="Stats &amp; Review | Lung Sound Study" />
+  <meta property="og:description" content="Per-label accuracy, weak labels and review." />
   <meta property="og:url" content="https://lungsoundstudy.com/stats.html" />
   <meta property="og:image" content="https://lungsoundstudy.com/og-image-v2.png" />
   <meta property="og:image:width" content="1200" />
@@ -24,8 +24,8 @@
   <meta property="og:locale" content="ko_KR" />
 
   <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="통계·복습 | 청진음 학습기" />
-  <meta name="twitter:description" content="학습 기록·정답률·약점 라벨을 한눈에 보고 자동 복습." />
+  <meta name="twitter:title" content="Stats &amp; Review | Lung Sound Study" />
+  <meta name="twitter:description" content="Per-label accuracy, weak labels and review." />
   <meta name="twitter:image" content="https://lungsoundstudy.com/og-image-v2.png" />
 </head>
 <body>
@@ -33,73 +33,75 @@
 
   <section class="page-hero" style="padding:36px 0 40px;">
     <div class="container">
-      <span class="eyebrow">Stats &amp; Review</span>
-      <h1 style="font-size:30px;">통계·복습</h1>
-      <p>학습 기록·정답률·약점 라벨을 한눈에 보고 약점 위주로 복습하세요.</p>
+      <span class="eyebrow" data-i18n="stats.eyebrow"></span>
+      <h1 style="font-size:30px;" data-i18n="stats.h1"></h1>
+      <p data-i18n="stats.intro"></p>
     </div>
   </section>
 
   <main class="section">
     <div class="container">
-      <h2 class="section-title">전체 요약</h2>
+      <h2 class="section-title" data-i18n="stats.section.overall"></h2>
       <div class="stat-strip" id="overall"></div>
 
-      <h2 class="section-title" style="margin-top:36px;">라벨별 정답률</h2>
-      <p class="section-subtitle">시도가 있는 라벨만 표시됩니다.</p>
+      <h2 class="section-title" style="margin-top:36px;" data-i18n="stats.section.bylabel"></h2>
+      <p class="section-subtitle" data-i18n="stats.section.bylabel.sub"></p>
       <div class="weak-list" id="labelList"></div>
 
-      <h2 class="section-title" style="margin-top:36px;">약점 라벨 (정답률 낮은 순)</h2>
-      <p class="section-subtitle">시도 3회 이상인 라벨 중 정답률이 낮은 항목.</p>
+      <h2 class="section-title" style="margin-top:36px;" data-i18n="stats.section.weak"></h2>
+      <p class="section-subtitle" data-i18n="stats.section.weak.sub"></p>
       <div class="weak-list" id="weakList"></div>
 
-      <h2 class="section-title" style="margin-top:36px;">최근 답안 (최신 20건)</h2>
+      <h2 class="section-title" style="margin-top:36px;" data-i18n="stats.section.recent"></h2>
       <div class="weak-list" id="recentList"></div>
 
       <div style="margin-top:36px; display:flex; gap:10px; flex-wrap:wrap;">
-        <a class="btn btn-primary" href="quiz.html">퀴즈 다시 풀기</a>
-        <a class="btn btn-outline" href="catalog.html">도감으로 복습</a>
-        <button class="btn btn-danger" id="resetBtn">학습 기록 초기화</button>
+        <a class="btn btn-primary" href="quiz.html" data-i18n="stats.cta.quiz"></a>
+        <a class="btn btn-outline" href="catalog.html" data-i18n="stats.cta.catalog"></a>
+        <button class="btn btn-danger" id="resetBtn" data-i18n="stats.cta.reset"></button>
       </div>
     </div>
   </main>
 
   <div id="siteFooter"></div>
 
-  <script src="js/data.js?v=8"></script>
-  <script src="js/storage.js?v=8"></script>
-  <script src="js/common.js?v=8"></script>
-  <script src="js/audio-viz.js?v=8"></script>
+  <script src="js/i18n.js?v=9"></script>
+  <script src="js/data.js?v=9"></script>
+  <script src="js/storage.js?v=9"></script>
+  <script src="js/common.js?v=9"></script>
+  <script src="js/audio-viz.js?v=9"></script>
   <script>
     UI.mount("stats");
 
     function render() {
       const state = Storage.load();
       const acc = Storage.getAccuracy();
+      const lang = I18n.current();
+      const locale = lang === "ko" ? "ko-KR" : "en-US";
 
       document.getElementById("overall").innerHTML = `
         <div class="stat-card">
-          <div class="label">전체 정답률</div>
+          <div class="label">${I18n.t("home.stat.accuracy")}</div>
           <div class="value">${acc.total ? (acc.rate*100).toFixed(0)+"%" : "—"}</div>
-          <div class="sub">${acc.correct}/${acc.total} 정답</div>
+          <div class="sub">${I18n.t("home.stat.accuracy.sub", { correct: acc.correct, total: acc.total })}</div>
         </div>
         <div class="stat-card">
-          <div class="label">시도한 라벨</div>
+          <div class="label">${I18n.t("stats.attempted")}</div>
           <div class="value">${Object.keys(state.attemptsByLabel).length} / ${LABEL_ORDER.length}</div>
-          <div class="sub">서로 다른 라벨 기준</div>
+          <div class="sub">${I18n.t("stats.attempted.sub")}</div>
         </div>
         <div class="stat-card">
-          <div class="label">학습한 샘플</div>
+          <div class="label">${I18n.t("home.stat.studied")}</div>
           <div class="value">${Object.keys(state.studiedFiles).length} / ${ALL_SAMPLES.length}</div>
-          <div class="sub">도감·비교 방문 기준</div>
+          <div class="sub">${I18n.t("home.stat.studied.sub")}</div>
         </div>
         <div class="stat-card">
-          <div class="label">총 시도</div>
+          <div class="label">${I18n.t("home.stat.attempts")}</div>
           <div class="value">${acc.total}</div>
-          <div class="sub">정답 ${acc.correct} · 오답 ${acc.wrong}</div>
+          <div class="sub">${I18n.t("home.stat.attempts.sub", { correct: acc.correct, wrong: acc.wrong })}</div>
         </div>
       `;
 
-      // 라벨별
       const labelList = document.getElementById("labelList");
       const rows = [];
       LABEL_ORDER.forEach(lab => {
@@ -109,62 +111,63 @@
         if (total === 0) return;
         const rate = a.correct / total;
         const meta = LABELS[lab];
+        const sub = lang === "ko" ? meta.name : meta.nameEn;
         rows.push(`
           <div class="weak-row">
             <div>
-              <strong>${UI.escapeHtml(meta.nameKo)}</strong>
-              <div class="meta">${UI.escapeHtml(meta.name)}</div>
+              <strong>${UI.escapeHtml(UI.labelName(meta))}</strong>
+              <div class="meta">${UI.escapeHtml(sub)}</div>
             </div>
             <span class="meta">${a.correct}/${total}</span>
             <span class="rate" style="color:${rate>=0.8?"var(--success)":rate>=0.5?"var(--warning)":"var(--danger)"}">${(rate*100).toFixed(0)}%</span>
           </div>
         `);
       });
-      labelList.innerHTML = rows.length ? rows.join("") : `<div class="weak-row"><span class="meta">아직 시도 기록이 없습니다.</span><span></span><span></span></div>`;
+      labelList.innerHTML = rows.length ? rows.join("") : `<div class="weak-row"><span class="meta">${I18n.t("stats.empty.attempts")}</span><span></span><span></span></div>`;
 
-      // 약점
       const weak = Storage.getWeakLabels(6);
       const weakList = document.getElementById("weakList");
       weakList.innerHTML = weak.length ? weak.map(w => {
         const meta = LABELS[w.id];
+        const sub = lang === "ko" ? meta.name : meta.nameEn;
         return `
           <div class="weak-row">
             <div>
-              <strong>${UI.escapeHtml(meta.nameKo)}</strong>
-              <div class="meta">${UI.escapeHtml(meta.name)}</div>
+              <strong>${UI.escapeHtml(UI.labelName(meta))}</strong>
+              <div class="meta">${UI.escapeHtml(sub)}</div>
             </div>
             <span class="meta">${w.correct}/${w.total}</span>
             <span class="rate">${(w.rate*100).toFixed(0)}%</span>
           </div>
         `;
-      }).join("") : `<div class="weak-row"><span class="meta">약점으로 분류된 라벨이 없습니다 (시도 3회 이상 기준).</span><span></span><span></span></div>`;
+      }).join("") : `<div class="weak-row"><span class="meta">${I18n.t("stats.empty.weak")}</span><span></span><span></span></div>`;
 
-      // 최근
       const recentList = document.getElementById("recentList");
       const recent = state.recentAnswers.slice(0, 20);
       recentList.innerHTML = recent.length ? recent.map(r => {
         const meta = LABELS[r.correctLabel];
-        const picked = r.pickedLabel ? UI.escapeHtml(LABELS[r.pickedLabel].nameKo) : "시간 초과";
+        const picked = r.pickedLabel ? UI.escapeHtml(UI.labelName(LABELS[r.pickedLabel])) : I18n.t("quiz.timeout");
         return `
           <div class="weak-row">
             <div>
-              <strong>${UI.escapeHtml(meta.nameKo)}</strong>
-              <div class="meta" style="font-family:ui-monospace,monospace; font-size:12px;">${UI.escapeHtml(r.file)} · 선택: ${picked}</div>
+              <strong>${UI.escapeHtml(UI.labelName(meta))}</strong>
+              <div class="meta" style="font-family:ui-monospace,monospace; font-size:12px;">${UI.escapeHtml(r.file)} · ${I18n.t("stats.picked")}: ${picked}</div>
             </div>
-            <span class="meta">${new Date(r.ts).toLocaleString("ko-KR")}</span>
-            <span class="rate" style="color:${r.ok?"var(--success)":"var(--danger)"}">${r.ok?"정답":"오답"}</span>
+            <span class="meta">${new Date(r.ts).toLocaleString(locale)}</span>
+            <span class="rate" style="color:${r.ok?"var(--success)":"var(--danger)"}">${r.ok?I18n.t("stats.correct"):I18n.t("stats.wrong")}</span>
           </div>
         `;
-      }).join("") : `<div class="weak-row"><span class="meta">최근 답안 기록이 없습니다.</span><span></span><span></span></div>`;
+      }).join("") : `<div class="weak-row"><span class="meta">${I18n.t("stats.empty.recent")}</span><span></span><span></span></div>`;
     }
 
     document.getElementById("resetBtn").addEventListener("click", () => {
-      if (confirm("학습 기록을 모두 초기화하시겠습니까? 되돌릴 수 없습니다.")) {
+      if (confirm(I18n.t("stats.confirm.reset"))) {
         Storage.reset(); render();
       }
     });
 
     render();
+    window.addEventListener("langchange", render);
   </script>
 </body>
 </html>

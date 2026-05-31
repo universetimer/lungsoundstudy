@@ -7,7 +7,7 @@
 
   <link rel="preconnect" href="https://cdn.jsdelivr.net" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css" />
-  <link rel="stylesheet" href="css/style.css?v=8" />
+  <link rel="stylesheet" href="css/style.css?v=9" />
   <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png" />
   <link rel="icon" type="image/png" sizes="192x192" href="favicon-192.png" />
   <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png" />
@@ -33,16 +33,16 @@
 
   <section class="page-hero" style="padding:36px 0 40px;">
     <div class="container">
-      <span class="eyebrow">Catalog</span>
-      <h1 style="font-size:30px;">청진음 도감</h1>
-      <p>6개 라벨의 실제 임상 청진음을 들으며 특징·시기·임상 의의·감별점을 학습합니다.</p>
+      <span class="eyebrow" data-i18n="catalog.eyebrow"></span>
+      <h1 style="font-size:30px;" data-i18n="catalog.h1"></h1>
+      <p data-i18n="catalog.intro"></p>
     </div>
   </section>
 
   <main class="section">
     <div class="container catalog-layout">
       <aside class="sidebar">
-        <h4>라벨</h4>
+        <h4 data-i18n="catalog.sidebar.labels"></h4>
         <div id="navList"></div>
       </aside>
 
@@ -50,13 +50,13 @@
         <div class="viz-help">
           <div class="viz-help-item">
             <span class="viz-help-dot" style="background:#14B8A6"></span>
-            <div><strong>파형 (Waveform)</strong> — 시간(x) × 진폭(y). 소리의 리듬·강약·burst를 한눈에. 짧은 폭발음(crackle)과 연속음(wheeze)의 시간 구조를 비교.</div>
+            <div><strong data-i18n="catalog.help.wf.title"></strong> — <span data-i18n="catalog.help.wf.body"></span></div>
           </div>
           <div class="viz-help-item">
             <span class="viz-help-dot" style="background:linear-gradient(180deg,#FCE694,#E04A89,#23114E)"></span>
-            <div><strong>스펙트로그램 (Spectrogram)</strong> — 시간(x) × 주파수(y, 50–500 Hz) × 강도(색). 가로줄(wheeze 음악적 음), 세로줄(crackle 폭발), 다음조 wheeze 같은 다중 주파수 패턴을 식별. 50 Hz 이하 DC·움직임 잡음 제외.</div>
+            <div><strong data-i18n="catalog.help.sg.title"></strong> — <span data-i18n="catalog.help.sg.body"></span></div>
           </div>
-          <div class="viz-help-foot">▶ 재생을 누르면 분석 후 표시됩니다 · 캔버스 클릭으로 시킹</div>
+          <div class="viz-help-foot" data-i18n="catalog.help.foot"></div>
         </div>
         <div id="content"></div>
       </div>
@@ -65,24 +65,25 @@
 
   <div id="siteFooter"></div>
 
-  <script src="js/data.js?v=8"></script>
-  <script src="js/storage.js?v=8"></script>
-  <script src="js/common.js?v=8"></script>
-  <script src="js/audio-viz.js?v=8"></script>
+  <script src="js/i18n.js?v=9"></script>
+  <script src="js/data.js?v=9"></script>
+  <script src="js/storage.js?v=9"></script>
+  <script src="js/common.js?v=9"></script>
+  <script src="js/audio-viz.js?v=9"></script>
   <script>
     UI.mount("catalog");
 
     let activeLabel = "crackle";
 
     function render() {
-      // 사이드바
+      const lang = I18n.current();
       const counts = sampleCountByLabel();
       const navList = document.getElementById("navList");
       navList.innerHTML = LABEL_ORDER.map(lab => {
         const meta = LABELS[lab];
         return `
           <button class="nav-item ${lab === activeLabel ? "active" : ""}" data-lab="${lab}">
-            <span>${UI.escapeHtml(meta.nameKo)}</span>
+            <span>${UI.escapeHtml(UI.labelName(meta))}</span>
             <span class="badge">${counts[lab]}</span>
           </button>
         `;
@@ -91,31 +92,31 @@
         btn.addEventListener("click", () => { activeLabel = btn.dataset.lab; render(); });
       });
 
-      // 콘텐츠
       const meta = LABELS[activeLabel];
       const samples = SAMPLES_BY_LABEL[activeLabel];
       const content = document.getElementById("content");
+      const typeText = lang === "ko" ? meta.type : meta.typeEn;
       content.innerHTML = `
         <article class="sound-card">
           <div class="sound-card-header">
             <div>
-              <h2>${UI.escapeHtml(meta.name)}</h2>
-              <div class="name-en">${UI.escapeHtml(meta.type)} 라벨 · ${samples.length}개 샘플</div>
+              <h2>${UI.escapeHtml(lang === "ko" ? meta.name : meta.nameEn)}</h2>
+              <div class="name-en">${UI.escapeHtml(typeText)} · ${I18n.t("catalog.samples", { n: samples.length })}</div>
             </div>
-            <span class="${UI.pillFor(activeLabel)}">${UI.escapeHtml(meta.nameKo)}</span>
+            <span class="${UI.pillFor(activeLabel)}">${UI.escapeHtml(UI.labelName(meta))}</span>
           </div>
-          <p style="color:var(--text-soft); margin-bottom:10px;">${UI.escapeHtml(meta.short)}</p>
+          <p style="color:var(--text-soft); margin-bottom:10px;">${UI.escapeHtml(UI.labelField(meta, "short"))}</p>
           <div class="sound-meta">
-            <div class="meta-row"><span class="meta-label">음질</span><span class="meta-value">${UI.escapeHtml(meta.quality)}</span></div>
-            <div class="meta-row"><span class="meta-label">시기</span><span class="meta-value">${UI.escapeHtml(meta.timing)}</span></div>
-            <div class="meta-row"><span class="meta-label">음높이</span><span class="meta-value">${UI.escapeHtml(meta.pitch)}</span></div>
+            <div class="meta-row"><span class="meta-label">${I18n.t("catalog.meta.quality")}</span><span class="meta-value">${UI.escapeHtml(UI.labelField(meta, "quality"))}</span></div>
+            <div class="meta-row"><span class="meta-label">${I18n.t("catalog.meta.timing")}</span><span class="meta-value">${UI.escapeHtml(UI.labelField(meta, "timing"))}</span></div>
+            <div class="meta-row"><span class="meta-label">${I18n.t("catalog.meta.pitch")}</span><span class="meta-value">${UI.escapeHtml(UI.labelField(meta, "pitch"))}</span></div>
           </div>
-          <div class="sound-section"><h4>임상 의의</h4><p>${UI.escapeHtml(meta.clinical)}</p></div>
-          <div class="sound-section"><h4>감별 포인트</h4><p>${UI.escapeHtml(meta.distinguish)}</p></div>
-          <div class="sound-section"><h4>Tip</h4><p>${UI.escapeHtml(meta.tip)}</p></div>
+          <div class="sound-section"><h4>${I18n.t("catalog.section.clinical")}</h4><p>${UI.escapeHtml(UI.labelField(meta, "clinical"))}</p></div>
+          <div class="sound-section"><h4>${I18n.t("catalog.section.distinguish")}</h4><p>${UI.escapeHtml(UI.labelField(meta, "distinguish"))}</p></div>
+          <div class="sound-section"><h4>${I18n.t("catalog.section.tip")}</h4><p>${UI.escapeHtml(UI.labelField(meta, "tip"))}</p></div>
         </article>
 
-        <h3 style="margin:24px 0 12px; font-size:16px; color:var(--text-soft);">샘플 ${samples.length}개</h3>
+        <h3 style="margin:24px 0 12px; font-size:16px; color:var(--text-soft);">${I18n.t("catalog.sample.count", { n: samples.length })}</h3>
         <div class="sample-list">
           ${samples.map((f) => `
             <div class="sample-item" data-file="${f}">
@@ -126,10 +127,8 @@
         </div>
       `;
 
-      // 첫 번째 샘플 자동 학습 기록
       Storage.recordStudy(samples[0]);
 
-      // 재생되면 학습 기록
       content.querySelectorAll(".sample-item audio").forEach(a => {
         a.addEventListener("play", () => {
           const file = a.closest(".sample-item").dataset.file;
@@ -139,6 +138,7 @@
     }
 
     render();
+    window.addEventListener("langchange", render);
   </script>
 </body>
 </html>

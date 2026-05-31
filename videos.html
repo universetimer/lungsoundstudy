@@ -31,37 +31,33 @@
 
   <link rel="preconnect" href="https://www.youtube.com" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css" />
-  <link rel="stylesheet" href="css/style.css?v=8" />
+  <link rel="stylesheet" href="css/style.css?v=9" />
 </head>
 <body>
   <div id="siteHeader"></div>
 
   <section class="page-hero" style="padding:36px 0 40px;">
     <div class="container">
-      <span class="eyebrow">Video Library</span>
-      <h1 style="font-size:30px;">영상 학습</h1>
-      <p>호흡음 청진을 짧은 동영상으로 학습합니다. 썸네일을 클릭하면 페이지 안에서 바로 재생됩니다.</p>
+      <span class="eyebrow" data-i18n="videos.eyebrow"></span>
+      <h1 style="font-size:30px;" data-i18n="videos.h1"></h1>
+      <p data-i18n="videos.intro"></p>
     </div>
   </section>
 
   <main class="section">
     <div class="container">
 
-      <!-- 카테고리 칩 -->
       <div class="checkbox-group" id="catFilter" style="margin-bottom:18px;"></div>
 
-      <!-- Lung Study Lab 섹션 -->
-      <h2 class="section-title">Lung Study Lab</h2>
-      <p class="section-subtitle" id="lslNote">정확한 채널 URL을 알려주시면 그 채널의 영상으로 즉시 교체합니다. 일단 같은 주제의 유사 자료를 표시합니다.</p>
+      <h2 class="section-title" data-i18n="videos.section.lsl"></h2>
+      <p class="section-subtitle" id="lslNote" data-i18n="videos.section.lsl.sub"></p>
       <div class="video-grid" id="lslGrid"></div>
 
-      <!-- 큐레이션 섹션 -->
-      <h2 class="section-title" style="margin-top:40px;">호흡음 청진 큐레이션</h2>
-      <p class="section-subtitle">교육 목적의 검증된 자료 모음.</p>
+      <h2 class="section-title" style="margin-top:40px;" data-i18n="videos.section.curated"></h2>
+      <p class="section-subtitle" data-i18n="videos.section.curated.sub"></p>
       <div class="video-grid" id="curatedGrid"></div>
 
-      <!-- 외부 사이트 -->
-      <h2 class="section-title" style="margin-top:40px;">추가 자료(외부 사이트)</h2>
+      <h2 class="section-title" style="margin-top:40px;" data-i18n="videos.section.external"></h2>
       <div class="weak-list">
         <a class="weak-row" href="https://www.easyauscultation.com/lung-sounds" target="_blank" rel="noopener" style="text-decoration:none; color:inherit;">
           <div>
@@ -97,38 +93,55 @@
 
   <div id="siteFooter"></div>
 
-  <script src="js/data.js?v=8"></script>
-  <script src="js/storage.js?v=8"></script>
-  <script src="js/common.js?v=8"></script>
-  <script src="js/audio-viz.js?v=8"></script>
+  <script src="js/i18n.js?v=9"></script>
+  <script src="js/data.js?v=9"></script>
+  <script src="js/storage.js?v=9"></script>
+  <script src="js/common.js?v=9"></script>
+  <script src="js/audio-viz.js?v=9"></script>
   <script>
     UI.mount("videos");
 
-    /* ======================================================
-       영상 목록 — Lung Study Lab 정확한 URL이 확인되면
-       이 배열의 lsl 섹션을 채널 영상으로 교체.
-       각 항목: { id, title, desc, tag, source(optional) }
-       ====================================================== */
     const LSL_VIDEOS = [
-      // 자리표시자 — 비슷한 주제의 영상
-      { id: "wE-xzCh8DpM", title: "Lung sounds made easy", desc: "정상/비정상 폐음을 짧고 시각적으로 정리.", tag: "기초" },
-      { id: "rr_saH-iKSY", title: "Breath Sound Lung Auscultations in 5 Minutes", desc: "5분 안에 핵심 폐음 패턴 훑기.", tag: "요약" },
-      { id: "xddT24a5XYc", title: "Lung sounds | Breathing Sounds | Auscultation", desc: "UKMLA/CPSA/PLAB 시험 대비 — 사례 중심.", tag: "사례" },
+      { id: "wE-xzCh8DpM",
+        title: { ko: "Lung sounds made easy", en: "Lung sounds made easy" },
+        desc:  { ko: "정상/비정상 폐음을 짧고 시각적으로 정리.", en: "Visual summary of normal and abnormal lung sounds." },
+        tag:   { ko: "기초", en: "Basics" } },
+      { id: "rr_saH-iKSY",
+        title: { ko: "Breath Sounds in 5 Minutes", en: "Breath Sounds in 5 Minutes" },
+        desc:  { ko: "5분 안에 핵심 폐음 패턴 훑기.", en: "Key lung sound patterns in 5 minutes." },
+        tag:   { ko: "요약", en: "Quick review" } },
+      { id: "xddT24a5XYc",
+        title: { ko: "Lung sounds | Auscultation", en: "Lung sounds | Auscultation" },
+        desc:  { ko: "UKMLA/CPSA/PLAB 시험 대비 — 사례 중심.", en: "Case-based for UKMLA/CPSA/PLAB exams." },
+        tag:   { ko: "사례", en: "Cases" } },
     ];
 
     const CURATED = [
-      { id: "ZYCDC0PqSbg", title: "Head-to-Toe Respiratory Assessment", desc: "호흡기 진찰 전체 술기 — 청진 위치/순서.", tag: "술기" },
-      { id: "2NvBk61ngDY", title: "Lung sounds (respiratory auscultation sounds)", desc: "정상 호흡음과 추가음을 비교하며 학습.", tag: "기초" },
-      { id: "PL3n8cHP87ijAalXtLG2YbDpuwjxuJRR-A", title: "Lung and Breath Sounds (재생목록)", desc: "여러 영상으로 구성된 시리즈.", tag: "시리즈", isPlaylist: true },
+      { id: "ZYCDC0PqSbg",
+        title: { ko: "Head-to-Toe Respiratory Assessment", en: "Head-to-Toe Respiratory Assessment" },
+        desc:  { ko: "호흡기 진찰 전체 술기 — 청진 위치/순서.", en: "Full respiratory exam — sequence and sites." },
+        tag:   { ko: "술기", en: "Technique" } },
+      { id: "2NvBk61ngDY",
+        title: { ko: "Lung sounds (respiratory auscultation)", en: "Lung sounds (respiratory auscultation)" },
+        desc:  { ko: "정상 호흡음과 추가음을 비교하며 학습.", en: "Compares normal sounds with adventitious sounds." },
+        tag:   { ko: "기초", en: "Basics" } },
+      { id: "PL3n8cHP87ijAalXtLG2YbDpuwjxuJRR-A",
+        title: { ko: "Lung and Breath Sounds (재생목록)", en: "Lung and Breath Sounds (Playlist)" },
+        desc:  { ko: "여러 영상으로 구성된 시리즈.", en: "A multi-video series." },
+        tag:   { ko: "시리즈", en: "Series" }, isPlaylist: true },
     ];
 
-    /* ---------- 카테고리 필터 칩 ---------- */
-    const allTags = Array.from(new Set([...LSL_VIDEOS, ...CURATED].map(v => v.tag))).sort();
-    const filter = document.getElementById("catFilter");
-    const allChip = makeChip("전체", "_all", true);
-    filter.appendChild(allChip);
-    allTags.forEach(t => filter.appendChild(makeChip(t, t, false)));
+    function _lang() { return I18n.current(); }
+    function tf(obj) { return obj && (obj[_lang()] || obj.ko || obj.en) || ""; }
 
+    const filter = document.getElementById("catFilter");
+    function buildFilter() {
+      const lang = _lang();
+      const allTags = Array.from(new Set([...LSL_VIDEOS, ...CURATED].map(v => v.tag[lang] || v.tag.ko))).sort();
+      filter.innerHTML = "";
+      filter.appendChild(makeChip(lang === "ko" ? "전체" : "All", "_all", true));
+      allTags.forEach(t => filter.appendChild(makeChip(t, t, false)));
+    }
     function makeChip(label, value, active) {
       const el = document.createElement("label");
       el.className = "chip-check" + (active ? " active" : "");
@@ -142,16 +155,14 @@
       });
       return el;
     }
-
     function selectedTag() {
       const el = filter.querySelector(".chip-check.active");
       return el ? el.dataset.val : "_all";
     }
 
-    /* ---------- 렌더 ---------- */
     function render() {
       const tag = selectedTag();
-      const matches = v => tag === "_all" || v.tag === tag;
+      const matches = v => tag === "_all" || tf(v.tag) === tag;
       renderGrid("lslGrid", LSL_VIDEOS.filter(matches));
       renderGrid("curatedGrid", CURATED.filter(matches));
     }
@@ -159,7 +170,8 @@
     function renderGrid(targetId, list) {
       const el = document.getElementById(targetId);
       if (list.length === 0) {
-        el.innerHTML = `<div class="weak-row"><span class="meta">해당 태그에 영상이 없습니다.</span><span></span><span></span></div>`;
+        const msg = _lang() === "ko" ? "해당 태그에 영상이 없습니다." : "No videos for this tag.";
+        el.innerHTML = `<div class="weak-row"><span class="meta">${msg}</span><span></span><span></span></div>`;
         return;
       }
       el.innerHTML = list.map(v => videoCard(v)).join("");
@@ -172,16 +184,17 @@
       const thumbUrl = v.isPlaylist
         ? "https://placehold.co/640x360/0f172a/14b8a6?text=Playlist"
         : `https://i.ytimg.com/vi/${v.id}/hqdefault.jpg`;
+      const title = tf(v.title), desc = tf(v.desc), tag = tf(v.tag);
       return `
         <article class="video-card">
           <div class="video-thumb" data-id="${v.id}">
-            <img class="video-poster" src="${thumbUrl}" alt="${UI.escapeHtml(v.title)}" loading="lazy" />
-            <button class="play-overlay" aria-label="재생" data-id="${v.id}" data-playlist="${v.isPlaylist ? "1" : "0"}"></button>
+            <img class="video-poster" src="${thumbUrl}" alt="${UI.escapeHtml(title)}" loading="lazy" />
+            <button class="play-overlay" aria-label="Play" data-id="${v.id}" data-playlist="${v.isPlaylist ? "1" : "0"}"></button>
           </div>
           <div class="video-meta">
-            <span class="video-tag">${UI.escapeHtml(v.tag)}</span>
-            <h3>${UI.escapeHtml(v.title)}</h3>
-            <p class="video-desc">${UI.escapeHtml(v.desc)}</p>
+            <span class="video-tag">${UI.escapeHtml(tag)}</span>
+            <h3>${UI.escapeHtml(title)}</h3>
+            <p class="video-desc">${UI.escapeHtml(desc)}</p>
           </div>
         </article>
       `;
@@ -194,7 +207,9 @@
       thumb.innerHTML = `<iframe src="${src}" title="YouTube video" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen loading="lazy"></iframe>`;
     }
 
+    buildFilter();
     render();
+    window.addEventListener("langchange", () => { buildFilter(); render(); });
   </script>
 </body>
 </html>

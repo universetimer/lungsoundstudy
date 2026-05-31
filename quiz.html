@@ -3,20 +3,20 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>퀴즈 | 청진음 학습기</title>
+  <title>Quiz | Lung Sound Study</title>
 
   <link rel="preconnect" href="https://cdn.jsdelivr.net" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css" />
-  <link rel="stylesheet" href="css/style.css?v=8" />
+  <link rel="stylesheet" href="css/style.css?v=9" />
   <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png" />
   <link rel="icon" type="image/png" sizes="192x192" href="favicon-192.png" />
   <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png" />
   <meta name="theme-color" content="#0E5A8A" />
 
   <meta property="og:type" content="website" />
-  <meta property="og:site_name" content="청진음 학습기" />
-  <meta property="og:title" content="퀴즈 모드 | 청진음 학습기" />
-  <meta property="og:description" content="실제 wave 파일로 출제하는 4지선다 청진음 식별 퀴즈." />
+  <meta property="og:site_name" content="Lung Sound Study" />
+  <meta property="og:title" content="Quiz | Lung Sound Study" />
+  <meta property="og:description" content="Multiple choice quiz on real lung sound wave files." />
   <meta property="og:url" content="https://lungsoundstudy.com/quiz.html" />
   <meta property="og:image" content="https://lungsoundstudy.com/og-image-v2.png" />
   <meta property="og:image:width" content="1200" />
@@ -24,8 +24,8 @@
   <meta property="og:locale" content="ko_KR" />
 
   <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="퀴즈 모드 | 청진음 학습기" />
-  <meta name="twitter:description" content="실제 wave 파일로 출제하는 4지선다 청진음 식별 퀴즈." />
+  <meta name="twitter:title" content="Quiz | Lung Sound Study" />
+  <meta name="twitter:description" content="Multiple choice quiz on real lung sound wave files." />
   <meta name="twitter:image" content="https://lungsoundstudy.com/og-image-v2.png" />
 </head>
 <body>
@@ -33,46 +33,44 @@
 
   <section class="page-hero" style="padding:36px 0 40px;">
     <div class="container">
-      <span class="eyebrow">Quiz</span>
-      <h1 style="font-size:30px;">퀴즈 모드</h1>
-      <p>실제 임상 청진음을 듣고 라벨을 맞춰보세요. 4지선다 + 제한시간 모드.</p>
+      <span class="eyebrow" data-i18n="quiz.eyebrow"></span>
+      <h1 style="font-size:30px;" data-i18n="quiz.h1"></h1>
+      <p data-i18n="quiz.intro"></p>
     </div>
   </section>
 
   <main class="section">
     <div class="container">
-      <!-- 설정 -->
       <div class="quiz-setup" id="setupView">
-        <h2 class="section-title" style="margin-bottom:16px;">퀴즈 설정</h2>
+        <h2 class="section-title" style="margin-bottom:16px;" data-i18n="quiz.setup.title"></h2>
 
         <div class="field">
-          <label>문제 수</label>
+          <label data-i18n="quiz.setup.count"></label>
           <select id="setQuestions">
-            <option value="5">5 문제</option>
-            <option value="10" selected>10 문제</option>
-            <option value="20">20 문제</option>
-            <option value="30">30 문제</option>
+            <option value="5">5</option>
+            <option value="10" selected>10</option>
+            <option value="20">20</option>
+            <option value="30">30</option>
           </select>
         </div>
 
         <div class="field">
-          <label>출제 범위 (라벨)</label>
+          <label data-i18n="quiz.setup.labels"></label>
           <div class="checkbox-group" id="setLabels"></div>
         </div>
 
         <div class="field">
-          <label>제한시간 (문항당)</label>
+          <label data-i18n="quiz.setup.time"></label>
           <div class="checkbox-group">
-            <label class="chip-check active" data-time="0"><input type="radio" name="time" value="0" checked /> 제한 없음</label>
-            <label class="chip-check" data-time="15"><input type="radio" name="time" value="15" /> 15초</label>
-            <label class="chip-check" data-time="30"><input type="radio" name="time" value="30" /> 30초</label>
+            <label class="chip-check active" data-time="0"><input type="radio" name="time" value="0" checked /> <span data-i18n="quiz.time.none"></span></label>
+            <label class="chip-check" data-time="15"><input type="radio" name="time" value="15" /> <span data-i18n="quiz.time.15"></span></label>
+            <label class="chip-check" data-time="30"><input type="radio" name="time" value="30" /> <span data-i18n="quiz.time.30"></span></label>
           </div>
         </div>
 
-        <button class="btn btn-primary btn-block" id="startQuiz" style="margin-top:8px;">퀴즈 시작</button>
+        <button class="btn btn-primary btn-block" id="startQuiz" style="margin-top:8px;" data-i18n="quiz.start"></button>
       </div>
 
-      <!-- 진행 -->
       <div class="quiz-panel" id="quizView" style="display:none;">
         <div class="quiz-progress">
           <span id="progressText"></span>
@@ -81,26 +79,25 @@
         <div class="quiz-bar"><div class="quiz-bar-fill" id="progressFill"></div></div>
 
         <div class="quiz-timer" id="timer" style="display:none;"></div>
-        <div class="quiz-question">이 청진음의 라벨은?</div>
+        <div class="quiz-question" data-i18n="quiz.question"></div>
         <div id="audioContainer"></div>
         <div class="option-grid" id="options"></div>
         <div class="quiz-feedback" id="feedback" style="display:none;"></div>
 
         <div class="quiz-actions">
-          <button class="btn btn-ghost" id="quitBtn">중단하고 결과 보기</button>
-          <button class="btn btn-primary" id="nextBtn" style="display:none;">다음 문제</button>
+          <button class="btn btn-ghost" id="quitBtn" data-i18n="quiz.quit"></button>
+          <button class="btn btn-primary" id="nextBtn" style="display:none;" data-i18n="quiz.next"></button>
         </div>
       </div>
 
-      <!-- 결과 -->
       <div class="quiz-panel" id="resultView" style="display:none;">
         <div class="quiz-result">
           <div class="score" id="resultScore"></div>
           <p id="resultText" style="margin-top:8px; color:var(--text-muted);"></p>
           <div style="margin-top:20px; display:flex; gap:10px; justify-content:center; flex-wrap:wrap;">
-            <button class="btn btn-primary" id="retryBtn">다시 풀기</button>
-            <a href="stats.html" class="btn btn-outline">통계 보기</a>
-            <a href="catalog.html" class="btn btn-ghost">도감으로 복습</a>
+            <button class="btn btn-primary" id="retryBtn" data-i18n="quiz.retry"></button>
+            <a href="stats.html" class="btn btn-outline" data-i18n="quiz.gotostats"></a>
+            <a href="catalog.html" class="btn btn-ghost" data-i18n="quiz.gotocatalog"></a>
           </div>
           <div id="missedList" style="margin-top:28px; text-align:left;"></div>
         </div>
@@ -110,28 +107,32 @@
 
   <div id="siteFooter"></div>
 
-  <script src="js/data.js?v=8"></script>
-  <script src="js/storage.js?v=8"></script>
-  <script src="js/common.js?v=8"></script>
-  <script src="js/audio-viz.js?v=8"></script>
+  <script src="js/i18n.js?v=9"></script>
+  <script src="js/data.js?v=9"></script>
+  <script src="js/storage.js?v=9"></script>
+  <script src="js/common.js?v=9"></script>
+  <script src="js/audio-viz.js?v=9"></script>
   <script>
     UI.mount("quiz");
 
-    // 라벨 칩
     const labContainer = document.getElementById("setLabels");
-    labContainer.innerHTML = LABEL_ORDER.map(lab => `
-      <label class="chip-check active" data-lab="${lab}">
-        <input type="checkbox" value="${lab}" checked /> ${UI.escapeHtml(LABELS[lab].nameKo)}
-      </label>
-    `).join("");
-    labContainer.querySelectorAll(".chip-check").forEach(el => {
-      el.addEventListener("click", (e) => {
-        e.preventDefault();
-        const inp = el.querySelector("input");
-        inp.checked = !inp.checked;
-        el.classList.toggle("active", inp.checked);
+    function renderLabels() {
+      labContainer.innerHTML = LABEL_ORDER.map(lab => `
+        <label class="chip-check active" data-lab="${lab}">
+          <input type="checkbox" value="${lab}" checked /> ${UI.escapeHtml(UI.labelName(LABELS[lab]))}
+        </label>
+      `).join("");
+      labContainer.querySelectorAll(".chip-check").forEach(el => {
+        el.addEventListener("click", (e) => {
+          e.preventDefault();
+          const inp = el.querySelector("input");
+          inp.checked = !inp.checked;
+          el.classList.toggle("active", inp.checked);
+        });
       });
-    });
+    }
+    renderLabels();
+    window.addEventListener("langchange", () => { renderLabels(); });
 
     document.querySelectorAll('.chip-check[data-time]').forEach(el => {
       el.addEventListener("click", (e) => {
@@ -156,14 +157,18 @@
       const n = parseInt(document.getElementById("setQuestions").value, 10);
       const labels = getSelectedLabels();
       const time = getSelectedTime();
+      const lang = I18n.current();
 
       if (labels.length < 4) {
-        alert("출제 범위에 최소 4개 라벨이 필요합니다 (4지선다).");
+        alert(lang === "ko" ? "출제 범위에 최소 4개 라벨이 필요합니다 (4지선다)." : "Need at least 4 labels for 4-choice quiz.");
         return null;
       }
       const pool = ALL_SAMPLES.filter(s => labels.includes(s.label));
       if (pool.length < n) {
-        if (!confirm(`선택한 범위의 샘플 수(${pool.length})가 문제 수(${n})보다 적습니다. 중복을 허용해 계속할까요?`)) return null;
+        const msg = lang === "ko"
+          ? `선택한 범위의 샘플 수(${pool.length})가 문제 수(${n})보다 적습니다. 중복을 허용해 계속할까요?`
+          : `Sample pool (${pool.length}) is smaller than question count (${n}). Allow duplicates?`;
+        if (!confirm(msg)) return null;
       }
 
       const shuffled = UI.shuffle(pool);
@@ -188,20 +193,22 @@
 
     function renderQuestion() {
       const q = quiz.questions[quiz.index];
+      const lang = I18n.current();
       quiz.locked = false;
 
       document.getElementById("progressText").textContent = `${quiz.index + 1} / ${quiz.questions.length}`;
-      document.getElementById("scoreText").textContent = `정답 ${quiz.score}`;
+      document.getElementById("scoreText").textContent = I18n.t("quiz.progress", { n: quiz.score });
       document.getElementById("progressFill").style.width = (quiz.index / quiz.questions.length * 100) + "%";
 
       document.getElementById("audioContainer").innerHTML = UI.audioElement(q.sample.file);
 
       document.getElementById("options").innerHTML = q.optLabels.map((lab, i) => {
         const meta = LABELS[lab];
+        const sub = lang === "ko" ? meta.name : meta.nameEn;
         return `
           <button class="option-btn" data-lab="${lab}">
-            <strong>${String.fromCharCode(65 + i)}.</strong> ${UI.escapeHtml(meta.nameKo)}
-            <div style="font-size:12px; color:var(--text-muted); margin-top:2px;">${UI.escapeHtml(meta.name)}</div>
+            <strong>${String.fromCharCode(65 + i)}.</strong> ${UI.escapeHtml(UI.labelName(meta))}
+            <div style="font-size:12px; color:var(--text-muted); margin-top:2px;">${UI.escapeHtml(sub)}</div>
           </button>
         `;
       }).join("");
@@ -216,11 +223,11 @@
       if (quiz.time > 0) {
         let remain = quiz.time;
         timerEl.style.display = "block";
-        timerEl.textContent = `남은 시간: ${remain}초`;
+        timerEl.textContent = I18n.t("quiz.timer", { n: remain });
         clearInterval(quiz.timerHandle);
         quiz.timerHandle = setInterval(() => {
           remain -= 1;
-          timerEl.textContent = `남은 시간: ${remain}초`;
+          timerEl.textContent = I18n.t("quiz.timer", { n: remain });
           if (remain <= 0) {
             clearInterval(quiz.timerHandle);
             if (!quiz.locked) pick(null);
@@ -238,6 +245,7 @@
 
       const q = quiz.questions[quiz.index];
       const correct = q.sample.label === pickedLabel;
+      const lang = I18n.current();
 
       document.querySelectorAll("#options .option-btn").forEach(b => {
         b.classList.add("disabled");
@@ -248,23 +256,25 @@
       const fb = document.getElementById("feedback");
       fb.style.display = "block";
       const cm = LABELS[q.sample.label];
+      const cmName = lang === "ko" ? cm.name : cm.nameEn;
+      const cmDist = UI.labelField(cm, "distinguish");
       if (correct) {
         quiz.score += 1;
         fb.className = "quiz-feedback correct";
-        fb.innerHTML = `<strong>정답!</strong> ${UI.escapeHtml(cm.name)}<br />${UI.escapeHtml(cm.distinguish)}`;
+        fb.innerHTML = `<strong>${I18n.t("quiz.correct")}</strong> ${UI.escapeHtml(cmName)}<br />${UI.escapeHtml(cmDist)}`;
       } else {
         fb.className = "quiz-feedback wrong";
-        const pickedTxt = pickedLabel ? UI.escapeHtml(LABELS[pickedLabel].nameKo) : "시간 초과";
-        fb.innerHTML = `<strong>오답 — 정답은 ${UI.escapeHtml(cm.name)}</strong><br />선택: ${pickedTxt}<br />${UI.escapeHtml(cm.distinguish)}`;
+        const pickedTxt = pickedLabel ? UI.escapeHtml(UI.labelName(LABELS[pickedLabel])) : I18n.t("quiz.timeout");
+        fb.innerHTML = `<strong>${I18n.t("quiz.wrong.prefix")} ${UI.escapeHtml(cmName)}</strong><br />${I18n.t("quiz.wrong.picked")}: ${pickedTxt}<br />${UI.escapeHtml(cmDist)}`;
         quiz.missed.push({ file: q.sample.file, correctLabel: q.sample.label, pickedLabel });
       }
 
       Storage.recordAttempt(q.sample.file, q.sample.label, pickedLabel, "quiz");
-      document.getElementById("scoreText").textContent = `정답 ${quiz.score}`;
+      document.getElementById("scoreText").textContent = I18n.t("quiz.progress", { n: quiz.score });
 
       const nextBtn = document.getElementById("nextBtn");
       nextBtn.style.display = "inline-flex";
-      nextBtn.textContent = quiz.index === quiz.questions.length - 1 ? "결과 보기" : "다음 문제";
+      nextBtn.textContent = quiz.index === quiz.questions.length - 1 ? I18n.t("quiz.result") : I18n.t("quiz.next");
     }
 
     document.getElementById("startQuiz").addEventListener("click", startQuiz);
@@ -289,30 +299,31 @@
       const pct = total ? Math.round((quiz.score / total) * 100) : 0;
       document.getElementById("resultScore").textContent = `${quiz.score} / ${total} (${pct}%)`;
 
-      let comment = "꾸준한 연습이 실력입니다.";
-      if (pct === 100) comment = "완벽! 비교 모드로 복합 라벨까지 깊이 있게 학습해 보세요.";
-      else if (pct >= 80) comment = "훌륭합니다. 오답 라벨만 도감에서 한 번 더 확인하세요.";
-      else if (pct >= 50) comment = "절반 이상! 통계 페이지에서 약점을 확인하면 효율적입니다.";
-      else comment = "도감 모드에서 기본 라벨부터 다시 듣고 오는 것을 추천합니다.";
-      document.getElementById("resultText").textContent = comment;
+      let key = "quiz.comment.low";
+      if (pct === 100) key = "quiz.comment.100";
+      else if (pct >= 80) key = "quiz.comment.80";
+      else if (pct >= 50) key = "quiz.comment.50";
+      document.getElementById("resultText").textContent = I18n.t(key);
 
       const missedEl = document.getElementById("missedList");
       if (quiz.missed.length === 0) { missedEl.innerHTML = ""; return; }
+      const lang = I18n.current();
       missedEl.innerHTML = `
-        <h3 style="margin-bottom:10px;">오답 노트</h3>
+        <h3 style="margin-bottom:10px;">${I18n.t("quiz.missed.title")}</h3>
         ${quiz.missed.map(m => {
           const cm = LABELS[m.correctLabel];
+          const cmName = lang === "ko" ? cm.name : cm.nameEn;
           return `
             <div class="sound-card" style="margin-bottom:10px; padding:14px 16px;">
               <div class="sound-card-header" style="margin-bottom:8px;">
                 <div>
-                  <strong>${UI.escapeHtml(cm.name)}</strong>
+                  <strong>${UI.escapeHtml(cmName)}</strong>
                   <div class="name-en" style="font-family:ui-monospace,monospace; font-size:12px;">${UI.escapeHtml(m.file)}</div>
                 </div>
-                <span class="${UI.pillFor(m.correctLabel)}">${UI.escapeHtml(cm.nameKo)}</span>
+                <span class="${UI.pillFor(m.correctLabel)}">${UI.escapeHtml(UI.labelName(cm))}</span>
               </div>
               ${UI.audioElement(m.file)}
-              <p style="margin-top:8px; font-size:14px; color:var(--text-soft)">${UI.escapeHtml(cm.distinguish)}</p>
+              <p style="margin-top:8px; font-size:14px; color:var(--text-soft)">${UI.escapeHtml(UI.labelField(cm, "distinguish"))}</p>
             </div>
           `;
         }).join("")}
