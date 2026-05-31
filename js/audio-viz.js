@@ -319,11 +319,22 @@
       });
   }
 
-  /* ---------- Delegation: 어떤 audio든 play 시 자동 enhance ---------- */
+  /* ---------- Delegation: 어떤 audio든 play 시 자동 enhance + 단일 재생 ---------- */
   document.addEventListener("play", (e) => {
     if (!(e.target instanceof HTMLAudioElement)) return;
     if (audioCtx.state === "suspended") audioCtx.resume();
     enhanceAudio(e.target);
+
+    // 다른 모든 오디오 일시정지 — 동시에 하나만 재생
+    // compare 페이지의 "동시 재생" 같은 의도적 동시 재생은 window.__allowConcurrentPlay로 예외
+    if (!window.__allowConcurrentPlay) {
+      const current = e.target;
+      document.querySelectorAll("audio").forEach(a => {
+        if (a !== current && !a.paused) {
+          a.pause();
+        }
+      });
+    }
   }, true);
 
   window.AudioViz = { enhanceAudio };
